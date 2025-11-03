@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
+import { Button } from "react-native-paper";
 
 export default function App() {
   // Load custom font
@@ -24,7 +25,7 @@ export default function App() {
 
     // --- Animation timing values ---
     const typingSpeed = 100;   // how fast each character appears (ms)
-    const deletingSpeed = 70; // how fast each character disappears (ms)
+    const deletingSpeed = 100; // how fast each character disappears (ms)
     const blinkSpeed = 500;   // how fast cursor blinks (ms)
 
     // --- State for our animation logic ---
@@ -116,6 +117,9 @@ export default function App() {
         {/* Cursor ▋ visibility controlled by showCursor */}
         <Text style={{ opacity: showCursor ? 1 : 0 }}>▋</Text>
       </Text>
+
+      {/* Button to start using app */}
+      <Button>Start</Button>
 
       {/* Background planet image */}
       <Image
