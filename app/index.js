@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, Image } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function IndexPage() {
     const router = useRouter();
@@ -108,7 +108,7 @@ export default function IndexPage() {
     if (!fontsLoaded) return null; // wait for font to load before rendering
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text
                 style={[
                     styles.text,
@@ -136,7 +136,8 @@ export default function IndexPage() {
                 source={require("../assets/images/planet00.png")}
                 style={styles.image}
             />
-        </View>
+
+        </SafeAreaView>
     );
 }
 

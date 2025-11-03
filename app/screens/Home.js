@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 
@@ -10,8 +9,6 @@ export default function Home() {
     return (
         <View style={styles.container}>
             <Text style={[styles.text, { fontFamily: "Audiowide_400Regular" }]}>This is the main screen!</Text>
-
-            <StatusBar style="auto" />
         </View>
     )
 }
