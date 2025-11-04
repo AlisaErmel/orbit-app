@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, Text, Image, Animated } from "react-native";
+import { StyleSheet, Text, Image, Animated, View } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
@@ -144,28 +144,30 @@ export default function IndexPage() {
             />
 
             {/* Button to start using app */}
-            {showButton && (
-                <Animated.View style={{ opacity: fadeAnim }}>
-                    <Button
-                        onPress={() => router.push("/screens/Home")}
-                        style={styles.button}
-                        mode="outlined"
+            <View style={styles.buttonContainer}>
+                {showButton && (
+                    <Animated.View style={{ opacity: fadeAnim }}>
+                        <Button
+                            onPress={() => router.push("/screens/Home")}
+                            style={styles.button}
+                            mode="outlined"
 
-                        icon={() => (
-                            <MaterialCommunityIcons
-                                name="rocket-launch-outline"
-                                size={28}
-                                color="black"
-                            />
-                        )}
-                    >
-                        <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular" }]}>
-                            Start
-                        </Text>
+                            icon={() => (
+                                <MaterialCommunityIcons
+                                    name="rocket-launch-outline"
+                                    size={28}
+                                    color="black"
+                                />
+                            )}
+                        >
+                            <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular" }]}>
+                                Start
+                            </Text>
 
-                    </Button>
-                </Animated.View>
-            )}
+                        </Button>
+                    </Animated.View>
+                )}
+            </View>
 
         </SafeAreaView>
     );
@@ -183,18 +185,24 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: "center",
         marginHorizontal: 20,
+        height: 60,
     },
     image: {
         height: "50%",
         width: "100%",
         resizeMode: "contain",
     },
+    buttonContainer: {
+        height: 120,
+        justifyContent: "center",
+        alignItems: "center",
+    },
     button: {
         margin: 20,
         padding: 15,
         borderRadius: 50,
         borderWidth: 5,
-        borderColor: 'drakblue',
+        borderColor: 'black',
     },
     buttonText: {
         color: 'black',
