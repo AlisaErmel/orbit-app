@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, Text, Image } from "react-native";
+import { StyleSheet, Text, Image, Animated } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function IndexPage() {
     const router = useRouter();
@@ -12,6 +13,9 @@ export default function IndexPage() {
     const [fontsLoaded] = useFonts({
         Audiowide_400Regular,
     });
+
+    //Animated opacity value for the button
+    const [fadeAnim] = useState(new Animated.Value(0)); // initial opacity 0
 
     // First and second texts to display
     const fullText1 = "Welcome to Orbit...";
@@ -22,6 +26,9 @@ export default function IndexPage() {
 
     // Controls whether the cursor ▋ is visible or not
     const [showCursor, setShowCursor] = useState(true);
+
+    //Controls the button visibility
+    const [showButton, setShowButton] = useState(false);
 
     useEffect(() => {
         if (!fontsLoaded) return; // wait until font is ready
@@ -83,6 +90,15 @@ export default function IndexPage() {
                                         phase = "blink";
                                         clearInterval(typeSecond);
 
+                                        // Show button when last text finishes typing
+                                        setShowButton(true);
+                                        Animated.timing(fadeAnim, {
+                                            toValue: 1,
+                                            duration: 1500, // fade-in duration in ms
+                                            useNativeDriver: true,
+                                        }).start();
+
+
                                         //Infinite cursor blinking
                                         blinkInterval = setInterval(() => {
                                             setShowCursor((prev) => !prev); // toggle cursor visibility
@@ -121,21 +137,35 @@ export default function IndexPage() {
                 <Text style={{ opacity: showCursor ? 1 : 0 }}>▋</Text>
             </Text>
 
-            {/* Button to start using app */}
-            <Button
-                //icon="gamepad-variant-outline"
-                onPress={() => router.push("/screens/Home")}
-                //style={styles.button}
-                mode="contained"
-            >
-                Start
-            </Button>
-
             {/* Background planet image */}
             <Image
                 source={require("../assets/images/planet00.png")}
                 style={styles.image}
             />
+
+            {/* Button to start using app */}
+            {showButton && (
+                <Animated.View style={{ opacity: fadeAnim }}>
+                    <Button
+                        onPress={() => router.push("/screens/Home")}
+                        style={styles.button}
+                        mode="outlined"
+
+                        icon={() => (
+                            <MaterialCommunityIcons
+                                name="rocket-launch-outline"
+                                size={28}
+                                color="black"
+                            />
+                        )}
+                    >
+                        <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular" }]}>
+                            Start
+                        </Text>
+
+                    </Button>
+                </Animated.View>
+            )}
 
         </SafeAreaView>
     );
@@ -159,4 +189,15 @@ const styles = StyleSheet.create({
         width: "100%",
         resizeMode: "contain",
     },
+    button: {
+        margin: 20,
+        padding: 15,
+        borderRadius: 50,
+        borderWidth: 5,
+        borderColor: 'drakblue',
+    },
+    buttonText: {
+        color: 'black',
+        fontSize: 16,
+    }
 });
