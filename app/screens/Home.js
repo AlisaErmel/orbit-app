@@ -19,7 +19,7 @@ export default function Home() {
                 {/* Button To Do list */}
                 <Button
                     onPress={() => router.push("/screens/ToDo")}
-                    style={styles.button}
+                    style={[styles.button, { backgroundColor: "#cd728971", borderColor: "#41111d71", }]}
                     mode="outlined"
                     icon={() => (
                         <Image
@@ -28,8 +28,26 @@ export default function Home() {
                         />
                     )}
                 >
-                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular" }]}>
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#41111d71", }]}>
                         -------{">"} To Do List
+                    </Text>
+                </Button>
+
+
+                {/* Button Mood Journal */}
+                <Button
+                    onPress={() => router.push("/screens/ToDo")}
+                    style={[styles.button, { backgroundColor: "#72cdcd71", borderColor: "#bd36ea71", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/moodjournal.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#bd36ea71" }]}>
+                        -------{">"} Mood Journal
                     </Text>
                 </Button>
             </View>
@@ -52,9 +70,7 @@ const styles = StyleSheet.create({
         marginTop: 100,
     },
     button: {
-        margin: 20,
-        backgroundColor: "#cd728971",
-        borderColor: "#41111d71",
+        marginTop: 20,
         borderWidth: 5,
         padding: 3,
         width: 300,
@@ -62,7 +78,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 16,
-        color: "black",
+        borderColor: "black",
     },
     buttonIcon: {
         height: 50,
