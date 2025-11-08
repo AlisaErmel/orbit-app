@@ -139,7 +139,7 @@ export default function IndexPage() {
 
             {/* Background planet image */}
             <Image
-                source={require("../assets/images/planet00.png")}
+                source={require("../assets/images/main.png")}
                 style={styles.image}
             />
 

@@ -36,18 +36,88 @@ export default function Home() {
 
                 {/* Button Mood Journal */}
                 <Button
-                    onPress={() => router.push("/screens/ToDo")}
+                    onPress={() => router.push("/screens/MoodJournal")}
                     style={[styles.button, { backgroundColor: "#72cdcd71", borderColor: "#bd36ea71", }]}
                     mode="outlined"
                     icon={() => (
                         <Image
-                            source={require("../../assets/images/moodjournal.png")}
+                            source={require("../../assets/images/mood_journal.png")}
                             style={styles.buttonIcon}
                         />
                     )}
                 >
                     <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#bd36ea71" }]}>
                         -------{">"} Mood Journal
+                    </Text>
+                </Button>
+
+
+                {/* Button Travel Journal */}
+                <Button
+                    onPress={() => router.push("/screens/TravelJournal")}
+                    style={[styles.button, { backgroundColor: "#45d3e571", borderColor: "#13b32371", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/travel_journal.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#13b32371" }]}>
+                        -------{">"} Travel Journal
+                    </Text>
+                </Button>
+
+
+                {/* Button Film Tracker */}
+                <Button
+                    onPress={() => router.push("/screens/FilmTracker")}
+                    style={[styles.button, { backgroundColor: "#e5884571", borderColor: "#7c390371", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/film_tracker.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#7c390371" }]}>
+                        -------{">"} Film Tracker
+                    </Text>
+                </Button>
+
+                {/* Button Book Tracker */}
+                <Button
+                    onPress={() => router.push("/screens/BookTracker")}
+                    style={[styles.button, { backgroundColor: "#e287e771", borderColor: "#3d044571", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/book_tracker.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#3d044571" }]}>
+                        -------{">"} Book Tracker
+                    </Text>
+                </Button>
+
+                {/* Button Water Tracker */}
+                <Button
+                    onPress={() => router.push("/screens/WaterTracker")}
+                    style={[styles.button, { backgroundColor: "#b0e5ef71", borderColor: "#04453671", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/water_tracker.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#04453671" }]}>
+                        -------{">"} Water Tracker
                     </Text>
                 </Button>
             </View>
@@ -68,13 +138,15 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginHorizontal: 20,
         marginTop: 100,
+        marginBottom: 20,
     },
     button: {
         marginTop: 20,
         borderWidth: 5,
         padding: 3,
         width: 300,
-        flexDirection: "row"
+        //alignItems: "flex-start",
+        //flexDirection: "row"
     },
     buttonText: {
         fontSize: 16,
