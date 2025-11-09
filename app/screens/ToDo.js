@@ -22,19 +22,26 @@ export default function ToDo() {
 
             {/* TextInput for Name of the ToDo */}
             <TextInput
-                label="Name"
+                placeholder="Name"
                 value={todo.name}
                 onChangeText={text => setToDo({ ...todo, name: text })}
                 mode="outlined"
+                outlineColor="#41111d71"
+                activeOutlineColor="#41111d"
+                outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
                 style={styles.textInput}
             />
 
+
             {/* TextInput for Category of the ToDo */}
             <TextInput
-                label="Category"
+                placeholder="Category"
                 value={todo.category}
                 onChangeText={text => setToDo({ ...todo, category: text })}
                 mode="outlined"
+                outlineColor="#41111d71"
+                activeOutlineColor="#41111d"
+                outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
                 style={styles.textInput}
             />
 
