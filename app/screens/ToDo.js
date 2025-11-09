@@ -2,13 +2,8 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Image } from "react-native";
 import { TextInput } from "react-native-paper";
-import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 
 export default function ToDo() {
-    const [fontsLoaded] = useFonts({
-        Audiowide_400Regular,
-    });
-
     const [todo, setToDo] = useState({
         name: "",
         category: "",
