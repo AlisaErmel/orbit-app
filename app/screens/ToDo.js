@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Image } from "react-native";
-import { TextInput } from "react-native-paper";
+import { StyleSheet, Image, FlatList, View, Text } from "react-native";
+import { TextInput, Button } from "react-native-paper";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
+import { db } from '../../firebaseConfig';
+import { ref, push, onValue, remove } from 'firebase/database';
 
 export default function ToDo() {
     //Font
@@ -17,10 +19,49 @@ export default function ToDo() {
 
     const [todo, setToDo] = useState({
         name: "",
+        description: "",
         category: "",
     })
 
     const categories = ["Study", "Groceries", "Documents", "Sport", "Personal", "Health", "Other"]
+
+    const [items, setItems] = useState([]);
+
+    // Sync dropdown with todo
+    useEffect(() => {
+        setToDo(prev => ({ ...prev, category }));
+    }, [category]);
+
+    useEffect(() => {
+        const itemsRef = ref(db, "/todolist/");
+        const unsubscribe = onValue(itemsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const formattedItems = Object.keys(data).map(key => ({
+                    id: key,       // store Firebase key
+                    ...data[key],
+                }));
+                setItems(formattedItems);
+            } else {
+                setItems([]);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+
+    const handleSave = () => {
+        if (todo.name && todo.category && todo.description) {
+            push(ref(db, 'todolist/'), todo);
+            setToDo({ name: "", description: "", category: "" }); // Clear input
+            setCategory(null); // reset dropdown
+        }
+    }
+
+    const deleteItem = (id) => {
+        remove(ref(db, `todolist/${id}`));
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -36,6 +77,18 @@ export default function ToDo() {
                 placeholder="Name"
                 value={todo.name}
                 onChangeText={text => setToDo({ ...todo, name: text })}
+                mode="outlined"
+                outlineColor="#41111d71"
+                activeOutlineColor="#41111d"
+                outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                style={styles.textInput}
+            />
+
+            {/* TextInput for Description of the ToDo */}
+            <TextInput
+                placeholder="Description"
+                value={todo.description}
+                onChangeText={text => setToDo({ ...todo, description: text })}
                 mode="outlined"
                 outlineColor="#41111d71"
                 activeOutlineColor="#41111d"
@@ -63,6 +116,27 @@ export default function ToDo() {
                 textStyle={{ fontFamily: "Audiowide_400Regular" }}
             />
 
+            {/* Button to save ToDo */}
+            <Button
+                mode="contained"
+                onPress={handleSave}
+                style={{ marginTop: 10, width: "80%" }}
+            >
+                Save
+            </Button>
+
+            <FlatList
+                data={items}
+                renderItem={({ item }) =>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text>{item.name}, </Text>
+                        <Text>{item.description}, </Text>
+                        <Text>{item.category}  </Text>
+                        <Text style={{ color: '#1f3f97ff' }} onPress={() => deleteItem(item.id)}>delete</Text>
+                    </View>
+                }
+            />
+
 
         </SafeAreaView>
     )
@@ -77,7 +151,7 @@ const styles = StyleSheet.create({
     },
     image: {
         height: "50%",
-        width: "100%",
+        width: "50%",
         resizeMode: "contain",
     },
     textInput: {
