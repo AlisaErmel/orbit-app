@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Image, FlatList, View, Text, TouchableWithoutFeedback, Keyboard, Modal, TouchableOpacity } from "react-native";
+import { StyleSheet, Image, FlatList, View, Text, TouchableWithoutFeedback, Keyboard, Modal, TouchableOpacity, ScrollView } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
@@ -71,140 +71,142 @@ export default function ToDo() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Top section */}
-            <View style={styles.topSection}>
-                <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>TO DO LIST</Text>
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                {/* Top section */}
+                <View style={styles.topSection}>
+                    <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>TO DO LIST</Text>
 
-                {/* Image of the section */}
-                <Image
-                    source={require("../../assets/images/todo.png")}
-                    style={styles.image}
-                />
+                    {/* Image of the section */}
+                    <Image
+                        source={require("../../assets/images/todo.png")}
+                        style={styles.image}
+                    />
 
-                {/* Button under image to open modal */}
-                <Button
-                    mode="outlined"
-                    onPress={() => setModalVisible(true)}
-                    style={styles.button}
+                    {/* Button under image to open modal */}
+                    <Button
+                        mode="outlined"
+                        onPress={() => setModalVisible(true)}
+                        style={styles.button}
+                    >
+                        <Text style={{ color: "#41111dff" }}>+ Add New Task</Text>
+                    </Button>
+                </View>
+
+
+                {/* Modal (popup window) to add a new ToDo task */}
+                <Modal
+                    visible={modalVisible}
+                    animationType="fade"
+                    transparent={true}
+                    onRequestClose={() => setModalVisible(false)}
                 >
-                    <Text style={{ color: "#41111dff" }}>+ Add New Task</Text>
-                </Button>
-            </View>
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContent}>
+                                {/* TextInput for Name of the ToDo */}
+                                <TextInput
+                                    placeholder="Name"
+                                    value={todo.name}
+                                    onChangeText={text => setToDo({ ...todo, name: text })}
+                                    mode="outlined"
+                                    outlineColor="#41111d71"
+                                    activeOutlineColor="#41111d"
+                                    outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                                    style={styles.textInput}
+                                />
+
+                                {/* TextInput for Description of the ToDo */}
+                                <TextInput
+                                    placeholder="Description"
+                                    value={todo.description}
+                                    onChangeText={text => setToDo({ ...todo, description: text })}
+                                    mode="outlined"
+                                    outlineColor="#41111d71"
+                                    activeOutlineColor="#41111d"
+                                    outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                                    style={styles.textInput}
+                                />
 
 
-            {/* Modal (popup window) to add a new ToDo task */}
-            <Modal
-                visible={modalVisible}
-                animationType="fade"
-                transparent={true}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContent}>
-                            {/* TextInput for Name of the ToDo */}
-                            <TextInput
-                                placeholder="Name"
-                                value={todo.name}
-                                onChangeText={text => setToDo({ ...todo, name: text })}
-                                mode="outlined"
-                                outlineColor="#41111d71"
-                                activeOutlineColor="#41111d"
-                                outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                                style={styles.textInput}
-                            />
+                                {/* DropDown Picker for Category of the ToDo */}
+                                <DropDownPicker
+                                    open={open}
+                                    value={category}
+                                    items={categories.map(cat => ({ label: cat, value: cat }))}
+                                    setOpen={setOpen}
+                                    setValue={setCategory}
+                                    placeholder="Select a category"
+                                    style={[
+                                        styles.dropdown,
+                                        open ? styles.dropdownOpen : null  // change border/background when open
+                                    ]}
+                                    dropDownContainerStyle={[
+                                        styles.dropdownContainer,
+                                        open ? styles.dropdownContainerOpen : null // change dropdown container when open
+                                    ]}
+                                    textStyle={{ fontFamily: "Audiowide_400Regular" }}
+                                />
 
-                            {/* TextInput for Description of the ToDo */}
-                            <TextInput
-                                placeholder="Description"
-                                value={todo.description}
-                                onChangeText={text => setToDo({ ...todo, description: text })}
-                                mode="outlined"
-                                outlineColor="#41111d71"
-                                activeOutlineColor="#41111d"
-                                outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                                style={styles.textInput}
-                            />
-
-
-                            {/* DropDown Picker for Category of the ToDo */}
-                            <DropDownPicker
-                                open={open}
-                                value={category}
-                                items={categories.map(cat => ({ label: cat, value: cat }))}
-                                setOpen={setOpen}
-                                setValue={setCategory}
-                                placeholder="Select a category"
-                                style={[
-                                    styles.dropdown,
-                                    open ? styles.dropdownOpen : null  // change border/background when open
-                                ]}
-                                dropDownContainerStyle={[
-                                    styles.dropdownContainer,
-                                    open ? styles.dropdownContainerOpen : null // change dropdown container when open
-                                ]}
-                                textStyle={{ fontFamily: "Audiowide_400Regular" }}
-                            />
-
-                            {/* Button to save ToDo */}
-                            <View style={styles.modalButtons}>
-                                <Button
-                                    mode="contained"
-                                    onPress={handleSave}
-                                    style={styles.saveButton}
-                                >
-                                    Save
-                                </Button>
-                                <Button
-                                    mode="contained"
-                                    onPress={() => setModalVisible(false)}
-                                    style={styles.cancelButton}
-                                >
-                                    Cancel
-                                </Button>
-                            </View>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-
-            <FlatList
-                data={items}
-                keyExtractor={(item) => item.id}
-                style={{ flex: 1, alignSelf: "stretch" }}
-                renderItem={({ item }) => {
-                    const isCompleted = completed[item.id] || false;
-
-                    return (
-                        <View style={styles.taskContainer}>
-                            <TouchableOpacity
-                                style={styles.radio}
-                                onPress={() => {
-                                    // Show filled circle briefly
-                                    setCompleted(prev => ({ ...prev, [item.id]: true }));
-
-                                    // Delete after short delay to show visual feedback
-                                    setTimeout(() => deleteItem(item.id), 200);
-                                }}
-                            >
-                                {isCompleted && <View style={styles.radioInner} />}
-                            </TouchableOpacity>
-
-                            {/* Task content */}
-                            <View style={styles.taskContent}>
-                                <View style={styles.taskHeader}>
-                                    <Text style={styles.taskName}>{item.name}</Text>
-                                    <View style={styles.category}>
-                                        <Text style={styles.categoryText}>{item.category}</Text>
-                                    </View>
+                                {/* Button to save ToDo */}
+                                <View style={styles.modalButtons}>
+                                    <Button
+                                        mode="contained"
+                                        onPress={handleSave}
+                                        style={styles.saveButton}
+                                    >
+                                        Save
+                                    </Button>
+                                    <Button
+                                        mode="contained"
+                                        onPress={() => setModalVisible(false)}
+                                        style={styles.cancelButton}
+                                    >
+                                        Cancel
+                                    </Button>
                                 </View>
-                                <Text style={styles.taskDescription}>{item.description}</Text>
                             </View>
                         </View>
-                    );
-                }}
-            />
+                    </TouchableWithoutFeedback>
+                </Modal>
 
+                <FlatList
+                    data={items}
+                    keyExtractor={(item) => item.id}
+                    scrollEnabled={false} // Disable FlatList scrolling
+                    style={{ flex: 1, alignSelf: "stretch" }}
+                    renderItem={({ item }) => {
+                        const isCompleted = completed[item.id] || false;
+
+                        return (
+                            <View style={styles.taskContainer}>
+                                <TouchableOpacity
+                                    style={styles.radio}
+                                    onPress={() => {
+                                        // Show filled circle briefly
+                                        setCompleted(prev => ({ ...prev, [item.id]: true }));
+
+                                        // Delete after short delay to show visual feedback
+                                        setTimeout(() => deleteItem(item.id), 200);
+                                    }}
+                                >
+                                    {isCompleted && <View style={styles.radioInner} />}
+                                </TouchableOpacity>
+
+                                {/* Task content */}
+                                <View style={styles.taskContent}>
+                                    <View style={styles.taskHeader}>
+                                        <Text style={styles.taskName}>{item.name}</Text>
+                                        <View style={styles.category}>
+                                            <Text style={styles.categoryText}>{item.category}</Text>
+                                        </View>
+                                    </View>
+                                    <Text style={styles.taskDescription}>{item.description}</Text>
+                                </View>
+                            </View>
+                        );
+                    }}
+                />
+            </ScrollView>
         </SafeAreaView>
     )
 }
