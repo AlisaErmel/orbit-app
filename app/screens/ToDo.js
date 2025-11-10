@@ -17,6 +17,10 @@ export default function ToDo() {
     const [open, setOpen] = useState(false);
     const [category, setCategory] = useState(null);
 
+    // currently active filter shown in the horizontal bar ("All" or one of categories)
+    const [selectedCategory, setSelectedCategory] = useState("All");
+
+
     // Form visibility
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -69,6 +73,12 @@ export default function ToDo() {
         remove(ref(db, `todolist/${id}`));
     }
 
+    // filtered items shown in the list based on selectedCategory
+    const filteredItems = selectedCategory === "All"
+        ? items
+        : items.filter(item => item.category === selectedCategory);
+
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
@@ -91,6 +101,33 @@ export default function ToDo() {
                         <Text style={{ color: "#41111dff" }}>+ Add New Task</Text>
                     </Button>
                 </View>
+
+
+                {/* --- FILTER ROW (All + categories) --- */}
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.filterBar}
+                >
+                    {["All", ...categories].map(cat => {
+                        const isSelected = selectedCategory === cat;
+                        return (
+                            <TouchableOpacity
+                                key={cat}
+                                onPress={() => setSelectedCategory(cat)}
+                                style={[
+                                    styles.filterButton,
+                                    isSelected && styles.filterButtonSelected
+                                ]}
+                            >
+                                <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
+                                    {cat}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </ScrollView>
+
 
 
                 {/* Modal (popup window) to add a new ToDo task */}
@@ -170,7 +207,7 @@ export default function ToDo() {
                 </Modal>
 
                 <FlatList
-                    data={items}
+                    data={filteredItems}
                     keyExtractor={(item) => item.id}
                     scrollEnabled={false} // Disable FlatList scrolling
                     style={{ flex: 1, alignSelf: "stretch" }}
@@ -346,4 +383,31 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#333",
     },
+    // Filter bar styles
+    filterBar: {
+        flexDirection: "row",
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        marginBottom: 8,
+    },
+    filterButton: {
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        borderRadius: 20,
+        borderWidth: 1.5,
+        borderColor: "#41111d",
+        marginRight: 8,
+        backgroundColor: "transparent",
+    },
+    filterButtonSelected: {
+        backgroundColor: "#41111d",
+    },
+    filterText: {
+        color: "#41111d",
+        fontWeight: "bold",
+    },
+    filterTextSelected: {
+        color: "#fff",
+    },
+
 })
