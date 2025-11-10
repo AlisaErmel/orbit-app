@@ -33,7 +33,7 @@ export default function ToDo() {
         category: "",
     })
 
-    const categories = ["Study", "Groceries", "Documents", "Sport", "Personal", "Health", "Other"]
+    const categories = ["Study", "Groceries", "Sport", "Documents", "Personal", "Health", "Other"]
 
     const [items, setItems] = useState([]);
 
@@ -80,7 +80,7 @@ export default function ToDo() {
 
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={[]}>
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 {/* Top section */}
                 <View style={styles.topSection}>
@@ -120,7 +120,7 @@ export default function ToDo() {
                                     isSelected && styles.filterButtonSelected
                                 ]}
                             >
-                                <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
+                                <Text style={[styles.filterText, isSelected && styles.filterTextSelected, { fontFamily: "Audiowide_400Regular" }]}>
                                     {cat}
                                 </Text>
                             </TouchableOpacity>
@@ -232,12 +232,12 @@ export default function ToDo() {
                                 {/* Task content */}
                                 <View style={styles.taskContent}>
                                     <View style={styles.taskHeader}>
-                                        <Text style={styles.taskName}>{item.name}</Text>
+                                        <Text style={[styles.taskName, { fontFamily: "Audiowide_400Regular" }]}>{item.name}</Text>
                                         <View style={styles.category}>
-                                            <Text style={styles.categoryText}>{item.category}</Text>
+                                            <Text style={[styles.categoryText, { fontFamily: "Audiowide_400Regular" }]}>{item.category}</Text>
                                         </View>
                                     </View>
-                                    <Text style={styles.taskDescription}>{item.description}</Text>
+                                    <Text style={[styles.taskDescription, { fontFamily: "Audiowide_400Regular" }]}>{item.description}</Text>
                                 </View>
                             </View>
                         );
@@ -260,7 +260,8 @@ const styles = StyleSheet.create({
         fontSize: 40,
         marginTop: 20,
         color: "#41111dff",
-        fontStyle: "bold"
+        fontStyle: "bold",
+        marginTop: 80, //IF I USE EDGES
     },
     image: {
         height: 250, // fixed height
