@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+import { StyleSheet, Text, View, Pressable, Image, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { TextInput, Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
@@ -22,121 +22,123 @@ export default function FilmTracker() {
     })
 
     return (
-        <SafeAreaView style={styles.container} edges={[]}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <SafeAreaView style={styles.container} edges={[]}>
 
-            {/* Header */}
-            <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>FILM TRACKER</Text>
+                {/* Header */}
+                <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>FILM TRACKER</Text>
 
-            {/* Inserting a new film form */}
-            {/*<Text>-----------------------------------------------------</Text>*/}
+                {/* Inserting a new film form */}
+                {/*<Text>-----------------------------------------------------</Text>*/}
 
-            <View style={styles.insertForm}>
+                <View style={styles.insertForm}>
 
-                {/* Rating: */}
-                <Text style={[styles.ratingText, { fontFamily: "Audiowide_400Regular" }]}>Rate the film:</Text>
-                <View style={{ flexDirection: "row", marginVertical: 5 }}>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <Pressable key={i} onPress={() => setFilm({ ...film, rating: i })}>
-                            <Image
-                                source={require("../../assets/images/film_tracker.png")} // only one image
-                                style={[styles.ratingImage, {
-                                    borderWidth: film.rating >= i ? 4 : 0,   // border appears if pressed
-                                    borderColor: film.rating >= i ? "#9a0537b6" : "transparent",
-                                }]}
-                            />
-                        </Pressable>
-                    ))}
-                </View>
-
-
-
-                {/* Name of the film: */}
-                <TextInput
-                    placeholder="Name"
-                    value={film.name}
-                    onChangeText={text => setFilm({ ...film, name: text })}
-                    mode="outlined"
-                    outlineColor="#e5884571"
-                    activeOutlineColor="#9a0537b6"
-                    outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                    style={styles.textInput}
-                />
-
-                {/* Comments of the film: */}
-                <TextInput
-                    placeholder="Comments"
-                    value={film.comments}
-                    onChangeText={text => setFilm({ ...film, comments: text })}
-                    mode="outlined"
-                    outlineColor="#e5884571"
-                    activeOutlineColor="#9a0537b6"
-                    outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                    style={styles.textInput}
-                />
-
-                {/* Image Picker */}
-                <Pressable
-                    style={[styles.imageInput, { alignItems: "center" }]}
-                    onPress={async () => {
-                        // Request permission first
-                        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-                        if (status !== 'granted') {
-                            Alert.alert(
-                                "Permission required",
-                                "Please grant access to your photos to pick an image."
-                            );
-                            return;
-                        }
-
-                        // Open image picker
-                        let result = await ImagePicker.launchImageLibraryAsync({
-                            mediaTypes: ["images"],
-                            quality: 1,
-                        });
-
-                        if (!result.canceled) {
-                            setFilm({ ...film, image: result.assets[0].uri });
-                        }
-                    }}
-                >
-                    <Text style={{ marginBottom: 5, fontFamily: "Audiowide_400Regular", color: "#9a0537b6" }}>
-                        Pick an Image (optional)
-                    </Text>
-
-                    {film.image && (
-                        <View style={{ position: 'relative' }}>
-                            <Image source={{ uri: film.image }} style={{ width: 100, height: 150 }} />
-                            <Pressable
-                                onPress={() => setFilm({ ...film, image: null })}
-                                style={{
-                                    position: 'absolute',
-                                    top: -4,
-                                    right: -5,
-                                    backgroundColor: "#9a0537b6",
-                                    padding: 5,
-                                    borderRadius: 50,
-                                }}
-                            >
-                                <MaterialIcons name="delete" size={24} color="white" />
+                    {/* Rating: */}
+                    <Text style={[styles.ratingText, { fontFamily: "Audiowide_400Regular" }]}>Rate the film:</Text>
+                    <View style={{ flexDirection: "row", marginVertical: 5 }}>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <Pressable key={i} onPress={() => setFilm({ ...film, rating: i })}>
+                                <Image
+                                    source={require("../../assets/images/film_tracker.png")} // only one image
+                                    style={[styles.ratingImage, {
+                                        borderWidth: film.rating >= i ? 4 : 0,   // border appears if pressed
+                                        borderColor: film.rating >= i ? "#9a0537b6" : "transparent",
+                                    }]}
+                                />
                             </Pressable>
-                        </View>
-
-                    )}
-                </Pressable>
+                        ))}
+                    </View>
 
 
-                {/* Button to save the film */}
-                <Button
-                    mode="contained"
-                    //onPress={handleSave}
-                    style={styles.saveButton}
-                >
-                    Save Film
-                </Button>
+
+                    {/* Name of the film: */}
+                    <TextInput
+                        placeholder="Name"
+                        value={film.name}
+                        onChangeText={text => setFilm({ ...film, name: text })}
+                        mode="outlined"
+                        outlineColor="#e5884571"
+                        activeOutlineColor="#9a0537b6"
+                        outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                        style={styles.textInput}
+                    />
+
+                    {/* Comments of the film: */}
+                    <TextInput
+                        placeholder="Comments"
+                        value={film.comments}
+                        onChangeText={text => setFilm({ ...film, comments: text })}
+                        mode="outlined"
+                        outlineColor="#e5884571"
+                        activeOutlineColor="#9a0537b6"
+                        outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                        style={styles.textInput}
+                    />
+
+                    {/* Image Picker */}
+                    <Pressable
+                        style={[styles.imageInput, { alignItems: "center" }]}
+                        onPress={async () => {
+                            // Request permission first
+                            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                            if (status !== 'granted') {
+                                Alert.alert(
+                                    "Permission required",
+                                    "Please grant access to your photos to pick an image."
+                                );
+                                return;
+                            }
+
+                            // Open image picker
+                            let result = await ImagePicker.launchImageLibraryAsync({
+                                mediaTypes: ["images"],
+                                quality: 1,
+                            });
+
+                            if (!result.canceled) {
+                                setFilm({ ...film, image: result.assets[0].uri });
+                            }
+                        }}
+                    >
+                        <Text style={{ marginBottom: 5, fontFamily: "Audiowide_400Regular", color: "#9a0537b6" }}>
+                            Pick an Image (optional)
+                        </Text>
+
+                        {film.image && (
+                            <View style={{ position: 'relative' }}>
+                                <Image source={{ uri: film.image }} style={{ width: 100, height: 150 }} />
+                                <Pressable
+                                    onPress={() => setFilm({ ...film, image: null })}
+                                    style={{
+                                        position: 'absolute',
+                                        top: -4,
+                                        right: -5,
+                                        backgroundColor: "#9a0537b6",
+                                        padding: 5,
+                                        borderRadius: 50,
+                                    }}
+                                >
+                                    <MaterialIcons name="delete" size={24} color="white" />
+                                </Pressable>
+                            </View>
+
+                        )}
+                    </Pressable>
 
 
-            </View>
-        </SafeAreaView >
+                    {/* Button to save the film */}
+                    <Button
+                        mode="contained"
+                        //onPress={handleSave}
+                        style={styles.saveButton}
+                    >
+                        Save Film
+                    </Button>
+
+
+                </View>
+            </SafeAreaView >
+        </TouchableWithoutFeedback>
     )
 }
 
