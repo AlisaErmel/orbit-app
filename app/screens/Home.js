@@ -73,7 +73,7 @@ export default function Home() {
                 {/* Button Film Tracker */}
                 <Button
                     onPress={() => router.push("/screens/FilmTracker")}
-                    style={[styles.button, { backgroundColor: "#e5884571", borderColor: "#7c390371", }]}
+                    style={[styles.button, { backgroundColor: "#e5884571", borderColor: "#9a05378f", }]}
                     mode="outlined"
                     icon={() => (
                         <Image
@@ -82,7 +82,7 @@ export default function Home() {
                         />
                     )}
                 >
-                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#7c390371" }]}>
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#9a05378f" }]}>
                         -------{">"} Film Tracker
                     </Text>
                 </Button>

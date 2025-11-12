@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
-import { TextInput } from "react-native-paper";
+import { TextInput, Button } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
+import DateTimePicker, { DateType, useDefaultStyles } from "react-native-ui-datepicker";
 
 export default function FilmTracker() {
     //Font
@@ -9,26 +12,109 @@ export default function FilmTracker() {
         Audiowide_400Regular,
     });
 
+    //Film
+    const [film, setFilm] = useState({
+        rating: 0, // 0-5
+        name: "",
+        comments: "",
+        image: null, //image url, if the user provides
+    })
+
+    //For Date
+    const [showPicker, setShowPicker] = useState(false);
+    const defaultStyles = useDefaultStyles();
+
     return (
         <SafeAreaView style={styles.container} edges={[]}>
 
             {/* Header */}
             <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>FILM TRACKER</Text>
 
-            {/* Inserting form */}
-            <View>
+            {/* Inserting a new film form */}
+            {/*<Text>-----------------------------------------------------</Text>*/}
+
+            <View style={styles.insertForm}>
+
+                {/* Rating: */}
+                <Text style={[styles.ratingText, { fontFamily: "Audiowide_400Regular" }]}>Rate the film:</Text>
+                <View style={{ flexDirection: "row", marginVertical: 5 }}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Pressable key={i} onPress={() => setFilm({ ...film, rating: i })}>
+                            <Image
+                                source={require("../../assets/images/film_tracker.png")} // only one image
+                                style={[styles.ratingImage, {
+                                    borderWidth: film.rating >= i ? 4 : 0,   // border appears if pressed
+                                    borderColor: film.rating >= i ? "#9a0537b6" : "transparent",
+                                }]}
+                            />
+                        </Pressable>
+                    ))}
+                </View>
+
+
+
+                {/* Name of the film: */}
                 <TextInput
                     placeholder="Name"
-                    //value={todo.name}
-                    //onChangeText={text => setToDo({ ...todo, name: text })}
+                    value={film.name}
+                    onChangeText={text => setFilm({ ...film, name: text })}
                     mode="outlined"
-                    outlineColor="#41111d71"
-                    activeOutlineColor="#41111d"
+                    outlineColor="#e5884571"
+                    activeOutlineColor="#9a0537b6"
                     outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
                     style={styles.textInput}
                 />
+
+                {/* Comments of the film: */}
+                <TextInput
+                    placeholder="Comments"
+                    value={film.comments}
+                    onChangeText={text => setFilm({ ...film, comments: text })}
+                    mode="outlined"
+                    outlineColor="#e5884571"
+                    activeOutlineColor="#9a0537b6"
+                    outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
+                    style={styles.textInput}
+                />
+
+                {/* Image Picker */}
+                <Pressable
+                    style={[styles.imageInput, { alignItems: "center" }]}
+                    onPress={async () => {
+                        let result = await ImagePicker.launchImageLibraryAsync({
+                            mediaTypes: ["images"],
+                            quality: 1,
+                        });
+                        if (!result.canceled) {
+                            setFilm({ ...film, image: result.assets[0].uri });
+                        }
+                    }}
+                >
+                    <Text style={{ marginBottom: 5, fontFamily: "Audiowide_400Regular", color: "#9a0537b6" }}>
+                        Pick an Image (optional)
+                    </Text>
+
+                    {film.image && (
+                        <Image
+                            source={{ uri: film.image }}
+                            style={{ width: 100, height: 150, alignSelf: "center" }}
+                        />
+                    )}
+                </Pressable>
+
+
+                {/* Button to save the film */}
+                <Button
+                    mode="contained"
+                    //onPress={handleSave}
+                    style={styles.saveButton}
+                >
+                    Save Film
+                </Button>
+
+
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 
@@ -42,12 +128,45 @@ const styles = StyleSheet.create({
     heading: {
         fontSize: 40,
         marginTop: 20,
-        color: "#7c3903ff",
+        color: "#9a0537b6",
         fontStyle: "bold",
         marginTop: 80, //IF I USE EDGES
+    },
+    //Inserting a new film form
+    ratingText: {
+        fontSize: 20,
+        color: "#9a0537b6"
+    },
+    ratingImage: {
+        width: 50,
+        height: 50,
+        marginHorizontal: 2,
+        borderRadius: 30, // optional rounded border
+    },
+    insertForm: {
+        position: "absolute",   // Makes it float above other content
+        top: 150,               // Distance from the top of the screen
+        left: 20,               // Distance from the left
+        right: 20,              // Distance from the right
+        borderColor: "#9a0537b6",
+        borderWidth: 5,
+        padding: 30,
+        borderRadius: 10,
+        alignItems: "center",
     },
     textInput: {
         width: "80%",
         marginVertical: 5,
+    },
+    imageInput: {
+        width: "80%",
+        marginVertical: 5,
+        padding: 10,
+        justifyContent: "center",
+    },
+    saveButton: {
+        width: "80%",
+        marginTop: 15,
+        backgroundColor: "#9a05377d",
     },
 })
