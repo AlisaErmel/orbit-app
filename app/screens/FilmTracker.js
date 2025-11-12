@@ -60,7 +60,7 @@ export default function FilmTracker() {
                         outlineColor="#e5884571"
                         activeOutlineColor="#9a0537b6"
                         outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                        style={styles.textInput}
+                        style={styles.nameTextInput}
                     />
 
                     {/* Comments of the film: */}
@@ -72,7 +72,9 @@ export default function FilmTracker() {
                         outlineColor="#e5884571"
                         activeOutlineColor="#9a0537b6"
                         outlineStyle={{ borderWidth: 5 }} // <-- makes the border thicker
-                        style={styles.textInput}
+                        style={styles.commentsTextInput}
+                        multiline={true}          // allow multi-line input
+                        textAlignVertical="top"   // start text from the top
                     />
 
                     {/* Image Picker */}
@@ -178,8 +180,13 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
     },
-    textInput: {
+    nameTextInput: {
         width: "80%",
+        marginVertical: 5,
+    },
+    commentsTextInput: {
+        width: "80%",
+        height: 150,
         marginVertical: 5,
     },
     imageInput: {
