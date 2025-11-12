@@ -4,7 +4,8 @@ import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { TextInput, Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import DateTimePicker, { DateType, useDefaultStyles } from "react-native-ui-datepicker";
+import { MaterialIcons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
 
 export default function FilmTracker() {
     //Font
@@ -19,10 +20,6 @@ export default function FilmTracker() {
         comments: "",
         image: null, //image url, if the user provides
     })
-
-    //For Date
-    const [showPicker, setShowPicker] = useState(false);
-    const defaultStyles = useDefaultStyles();
 
     return (
         <SafeAreaView style={styles.container} edges={[]}>
@@ -81,10 +78,22 @@ export default function FilmTracker() {
                 <Pressable
                     style={[styles.imageInput, { alignItems: "center" }]}
                     onPress={async () => {
+                        // Request permission first
+                        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                        if (status !== 'granted') {
+                            Alert.alert(
+                                "Permission required",
+                                "Please grant access to your photos to pick an image."
+                            );
+                            return;
+                        }
+
+                        // Open image picker
                         let result = await ImagePicker.launchImageLibraryAsync({
                             mediaTypes: ["images"],
                             quality: 1,
                         });
+
                         if (!result.canceled) {
                             setFilm({ ...film, image: result.assets[0].uri });
                         }
@@ -95,10 +104,23 @@ export default function FilmTracker() {
                     </Text>
 
                     {film.image && (
-                        <Image
-                            source={{ uri: film.image }}
-                            style={{ width: 100, height: 150, alignSelf: "center" }}
-                        />
+                        <View style={{ position: 'relative' }}>
+                            <Image source={{ uri: film.image }} style={{ width: 100, height: 150 }} />
+                            <Pressable
+                                onPress={() => setFilm({ ...film, image: null })}
+                                style={{
+                                    position: 'absolute',
+                                    top: -4,
+                                    right: -5,
+                                    backgroundColor: "#9a0537b6",
+                                    padding: 5,
+                                    borderRadius: 50,
+                                }}
+                            >
+                                <MaterialIcons name="delete" size={24} color="white" />
+                            </Pressable>
+                        </View>
+
                     )}
                 </Pressable>
 
