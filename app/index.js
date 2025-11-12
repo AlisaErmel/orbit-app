@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { StyleSheet, Text, Image, Animated, View } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Button } from "react-native-paper";
@@ -8,142 +8,101 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function IndexPage() {
     const router = useRouter();
+    const [fontsLoaded] = useFonts({ Audiowide_400Regular });
 
-    // Load custom font
-    const [fontsLoaded] = useFonts({
-        Audiowide_400Regular,
-    });
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const [displayedText, setDisplayedText] = useState("");
+    const [showCursor, setShowCursor] = useState(true);
+    const [showButton, setShowButton] = useState(false);
 
-    //Animated opacity value for the button
-    const [fadeAnim] = useState(new Animated.Value(0)); // initial opacity 0
+    const blinkInterval = useRef(null);
+    const typingTimeout = useRef(null);
 
-    // First and second texts to display
     const fullText1 = "Welcome to Orbit...";
     const fullText2 = "Orbit — a personal daily life companion app.";
 
-    // Holds currently visible part of text
-    const [displayedText, setDisplayedText] = useState("");
-
-    // Controls whether the cursor ▋ is visible or not
-    const [showCursor, setShowCursor] = useState(true);
-
-    //Controls the button visibility
-    const [showButton, setShowButton] = useState(false);
-
     useEffect(() => {
-        if (!fontsLoaded) return; // wait until font is ready
+        if (!fontsLoaded) return;
 
-        // --- Animation timing values ---
-        const typingSpeed = 100;   // how fast each character appears (ms)
-        const deletingSpeed = 100; // how fast each character disappears (ms)
-        const blinkSpeed = 500;   // how fast cursor blinks (ms)
+        const typingSpeed = 100;
+        const blinkSpeed = 500;
 
-        // --- State for our animation logic ---
-        let index = 0;            // current character index
-        let phase = "typing1";    // animation phase: typing1 → blink → deleting → typing2
-        let blinkInterval;        // will hold cursor blinking timer
-
-        // --- Main typing loop for the first text ---
-        const typeInterval = setInterval(() => {
-            if (phase === "typing1") {
-                // Show text gradually up to current index
-                setDisplayedText(fullText1.slice(0, index));
-                index++;
-
-                // When typing is done:
-                if (index > fullText1.length) {
-                    // Switch to blinking phase
-                    phase = "blink";
-                    index = fullText1.length;
-                    clearInterval(typeInterval); // stop typing
-
-                    // --- Start blinking cursor ---
-                    blinkInterval = setInterval(() => {
-                        setShowCursor((prev) => !prev); // toggle cursor visibility
-                    }, blinkSpeed);
-
-                    // --- After 2 seconds of blinking, start deleting phase ---
-                    setTimeout(() => {
-                        clearInterval(blinkInterval); // stop blinking
-                        setShowCursor(true);          // keep cursor visible for deletion
-                        phase = "deleting";           // switch phase
-                        index = fullText1.length;     // start deleting from end
-
-                        // --- Deleting loop ---
-                        const deleteInterval = setInterval(() => {
-                            setDisplayedText(fullText1.slice(0, index)); // shrink text
-                            index--;
-
-                            // When text is fully deleted:
-                            if (index < 0) {
-                                clearInterval(deleteInterval);
-                                phase = "typing2"; // move to next phase
-                                index = 0;
-
-                                // --- Typing second text ---
-                                const typeSecond = setInterval(() => {
-                                    setDisplayedText(fullText2.slice(0, index)); // grow text
-                                    index++;
-
-                                    // Stop when second text is complete
-                                    if (index > fullText2.length) {
-                                        phase = "blink";
-                                        clearInterval(typeSecond);
-
-                                        // Show button when last text finishes typing
-                                        setShowButton(true);
-                                        Animated.timing(fadeAnim, {
-                                            toValue: 1,
-                                            duration: 1500, // fade-in duration in ms
-                                            useNativeDriver: true,
-                                        }).start();
-
-
-                                        //Infinite cursor blinking
-                                        blinkInterval = setInterval(() => {
-                                            setShowCursor((prev) => !prev); // toggle cursor visibility
-                                        }, blinkSpeed);
-                                    }
-
-
-                                }, typingSpeed);
-                            }
-                        }, deletingSpeed);
-                    }, 2000); // 2s blinking duration
-                }
-            }
-        }, typingSpeed);
-
-        // Cleanup any intervals if component unmounts
-        return () => {
-            clearInterval(typeInterval);
-            clearInterval(blinkInterval);
+        const startBlinking = () => {
+            // Ensure no multiple intervals
+            if (blinkInterval.current) clearInterval(blinkInterval.current);
+            blinkInterval.current = setInterval(() => {
+                setShowCursor(prev => !prev);
+            }, blinkSpeed);
         };
-    }, [fontsLoaded]); // run once when fonts are ready
 
-    if (!fontsLoaded) return null; // wait for font to load before rendering
+        const stopBlinking = () => {
+            if (blinkInterval.current) clearInterval(blinkInterval.current);
+            setShowCursor(true);
+        };
+
+        const typeText = (text, callback) => {
+            let index = 0;
+
+            const typeChar = () => {
+                setDisplayedText(text.slice(0, index));
+                index++;
+                if (index <= text.length) {
+                    typingTimeout.current = setTimeout(typeChar, typingSpeed);
+                } else {
+                    callback && callback();
+                }
+            };
+            typeChar();
+        };
+
+        // Start typing first text
+        typeText(fullText1, () => {
+            // Pause 1s then delete
+            setTimeout(() => {
+                let index = fullText1.length;
+                const deleteChar = () => {
+                    setDisplayedText(fullText1.slice(0, index));
+                    index--;
+                    if (index >= 0) {
+                        typingTimeout.current = setTimeout(deleteChar, typingSpeed);
+                    } else {
+                        // Type second text
+                        typeText(fullText2, () => {
+                            setShowButton(true);
+                            Animated.timing(fadeAnim, {
+                                toValue: 1,
+                                duration: 1500,
+                                useNativeDriver: true,
+                            }).start();
+                            startBlinking();
+                        });
+                    }
+                };
+                deleteChar();
+            }, 1000);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (blinkInterval.current) clearInterval(blinkInterval.current);
+            if (typingTimeout.current) clearTimeout(typingTimeout.current);
+        };
+    }, [fontsLoaded]);
+
+    if (!fontsLoaded) return null;
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text
-                style={[
-                    styles.text,
-                    { fontFamily: "Audiowide_400Regular" },
-                ]}
-            >
-                {/* Show currently typed text */}
+            <Text style={[styles.text, { fontFamily: "Audiowide_400Regular" }]}>
                 {displayedText}
-                {/* Cursor ▋ visibility controlled by showCursor */}
                 <Text style={{ opacity: showCursor ? 1 : 0 }}>▋</Text>
             </Text>
 
-            {/* Background planet image */}
             <Image
                 source={require("../assets/images/main.png")}
                 style={styles.image}
             />
 
-            {/* Button to start using app */}
             <View style={styles.buttonContainer}>
                 {showButton && (
                     <Animated.View style={{ opacity: fadeAnim }}>
@@ -151,7 +110,6 @@ export default function IndexPage() {
                             onPress={() => router.push("/screens/Home")}
                             style={styles.button}
                             mode="outlined"
-
                             icon={() => (
                                 <MaterialCommunityIcons
                                     name="rocket-launch-outline"
@@ -163,17 +121,14 @@ export default function IndexPage() {
                             <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular" }]}>
                                 Start
                             </Text>
-
                         </Button>
                     </Animated.View>
                 )}
             </View>
-
         </SafeAreaView>
     );
 }
 
-// Basic styling
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -207,5 +162,5 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'black',
         fontSize: 16,
-    }
+    },
 });
