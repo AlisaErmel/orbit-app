@@ -6,6 +6,8 @@ import { TextInput, Button } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from '@expo/vector-icons';
 import { Alert } from 'react-native';
+import { db } from '../../firebaseConfig';
+import { ref, push, onValue, remove } from 'firebase/database';
 
 export default function FilmTracker() {
     //Font
@@ -20,6 +22,14 @@ export default function FilmTracker() {
         comments: "",
         image: null, //image url, if the user provides
     })
+
+    // Save a new film
+    const handleSave = () => {
+        if (film.rating && film.name) {
+            push(ref(db, 'filmtracker/'), film);
+            setFilm({ rating: 0, name: "", comments: "", image: null }); // Clear input
+        }
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -131,7 +141,7 @@ export default function FilmTracker() {
                     {/* Button to save the film */}
                     <Button
                         mode="contained"
-                        //onPress={handleSave}
+                        onPress={handleSave}
                         style={styles.saveButton}
                     >
                         Save Film
