@@ -1,26 +1,36 @@
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View, Text, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-//For Testing:
-const films = [
-    {
-        id: "1",
-        name: "Inception",
-        comments: "Amazing movie about a lot of new hostory and art!",
-        rating: 5,
-        image: null, // will fallback to default
-    },
-    {
-        id: "2",
-        name: "Titanic",
-        comments: "Classic romance",
-        rating: 4,
-        image: null,
-    },
-];
-
+import { db } from '../../firebaseConfig';
+import { ref, onValue } from 'firebase/database';
 
 export default function FilmTracker_List() {
+
+    //State for films
+    const [films, setFilms] = useState([]);
+
+    //Fetch films from Firebase
+    useEffect(() => {
+        const filmsRef = ref(db, 'filmtracker/'); // your path in Firebase
+
+        const unsubscribe = onValue(filmsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Convert object to array
+                const filmsArray = Object.keys(data).map(key => ({
+                    id: key,       // use Firebase key as id
+                    ...data[key]   // spread the rest of the film data
+                }));
+                setFilms(filmsArray);
+            } else {
+                setFilms([]); // no data
+            }
+        });
+
+        // Clean up the listener when the component unmounts
+        return () => unsubscribe();
+    }, []);
+
 
     return (
         <SafeAreaView style={styles.container} edges={[]}>
