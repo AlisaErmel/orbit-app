@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     },
     insertForm: {
         marginTop: 10,   // instead of top: 300
-        width: "90%",    // control width
+        width: "80%",    // control width
         alignSelf: "center", // center horizontally
         borderColor: "#9a0537b6",
         borderWidth: 5,
@@ -262,22 +262,22 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     nameTextInput: {
-        width: "80%",
+        width: "95%",
         marginVertical: 5,
     },
     commentsTextInput: {
-        width: "80%",
+        width: "95%",
         height: 150,
         marginVertical: 5,
     },
     imageInput: {
-        width: "80%",
+        width: "90%",
         marginVertical: 5,
         padding: 10,
         justifyContent: "center",
     },
     saveButton: {
-        width: "80%",
+        width: "95%",
         marginTop: 15,
         backgroundColor: "#9a05377d",
     },
