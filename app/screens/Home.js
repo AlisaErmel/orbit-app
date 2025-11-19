@@ -47,7 +47,7 @@ export default function Home() {
                     )}
                 >
                     <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#bd36ea71" }]}>
-                        -------{">"} Mood Journal
+                        -------{">"} ABOUT APP (was a mood journal)
                     </Text>
                 </Button>
 
