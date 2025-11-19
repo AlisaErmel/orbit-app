@@ -49,6 +49,7 @@ export default function FilmTracker() {
                             paddingBottom: film.image ? 120 : 20, // more space if image is added
                             alignItems: "center",
                         }}
+                        nestedScrollEnabled={true} // allows inner scroll views to scroll properly inside outer scroll views
                         keyboardShouldPersistTaps="handled" // allows tapping buttons while keyboard is open
                     >
 
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         color: "#9a0537cd",
-        textAlign: "#9a0537d7",
+        textAlign: "center",
     },
     //Inserting a new film form
     ratingText: {
@@ -271,6 +272,7 @@ const styles = StyleSheet.create({
         width: "95%",
         height: 150,
         marginVertical: 5,
+        minHeight: 150,
     },
     imageInput: {
         width: "90%",
