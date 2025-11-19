@@ -39,6 +39,11 @@ export default function FilmTracker() {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={{ flex: 1, width: "100%" }}
                 >
+
+                    {/* Header */}
+                    <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular", alignSelf: "center" }]}>FILM TRACKER</Text>
+
+
                     <ScrollView
                         contentContainerStyle={{
                             paddingBottom: film.image ? 120 : 20, // more space if image is added
@@ -46,10 +51,6 @@ export default function FilmTracker() {
                         }}
                         keyboardShouldPersistTaps="handled" // allows tapping buttons while keyboard is open
                     >
-
-
-                        {/* Header */}
-                        <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>FILM TRACKER</Text>
 
                         {/* Button to see the list of films*/}
                         <Button
@@ -225,6 +226,22 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
     },
+    //Form header
+    formHeaderContainer: {
+        position: "absolute",  // so it overlaps the border
+        top: -18,              // slightly above the form's top border
+        backgroundColor: "white", // same as container background
+        paddingHorizontal: 10, // some space around the text
+        borderRadius: 20,
+        borderWidth: 5,
+        borderColor: "#9a0537d7",
+    },
+    formHeader: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#9a0537cd",
+        textAlign: "#9a0537d7",
+    },
     //Inserting a new film form
     ratingText: {
         fontSize: 20,
@@ -245,21 +262,6 @@ const styles = StyleSheet.create({
         padding: 30,
         borderRadius: 10,
         alignItems: "center",
-    },
-    formHeaderContainer: {
-        position: "absolute",  // so it overlaps the border
-        top: -18,              // slightly above the form's top border
-        backgroundColor: "white", // same as container background
-        paddingHorizontal: 10, // some space around the text
-        borderRadius: 20,
-        borderWidth: 5,
-        borderColor: "#ac0b41c3",
-    },
-    formHeader: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#9a0537b6",
-        textAlign: "center",
     },
     nameTextInput: {
         width: "95%",
