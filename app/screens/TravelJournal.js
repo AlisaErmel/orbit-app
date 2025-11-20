@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Image, View, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { StyleSheet, Image, View, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Animated } from "react-native";
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { TextInput, Button, Card, Text } from 'react-native-paper';
@@ -26,6 +26,33 @@ export default function TravelJournal() {
 
     const [searchText, setSearchText] = useState('');
     const [markers, setMarkers] = useState([]);
+
+    //Track keyboard height
+    const keyboardOffset = useState(new Animated.Value(0))[0];
+
+    useEffect(() => {
+        const show = Keyboard.addListener("keyboardWillShow", (e) => {
+            Animated.timing(keyboardOffset, {
+                toValue: e.endCoordinates.height,
+                duration: 250,
+                useNativeDriver: false,
+            }).start();
+        });
+
+        const hide = Keyboard.addListener("keyboardWillHide", () => {
+            Animated.timing(keyboardOffset, {
+                toValue: 0,
+                duration: 250,
+                useNativeDriver: false,
+            }).start();
+        });
+
+        return () => {
+            show.remove();
+            hide.remove();
+        };
+    }, []);
+
 
     const handleAddCity = async () => {
         if (!searchText) return;
@@ -57,6 +84,9 @@ export default function TravelJournal() {
 
                 // Clear input
                 setSearchText('');
+
+                //Hide input
+                Keyboard.dismiss();
             }
         } catch (err) {
             console.log('Error:', err);
@@ -66,43 +96,39 @@ export default function TravelJournal() {
     return (
         <SafeAreaView style={styles.container} edges={[]}>
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                {/* Map with travel savings*/}
+                <View style={{ flex: 1, position: 'relative' }}>
+                    <MapView style={{ flex: 1 }} region={mapRegion}>
+                        {markers.map((marker, index) => (
+                            <Marker key={index} coordinate={marker.coordinate}>
+                                <Image
+                                    source={require("../../assets/icons/location.png")}
+                                    style={{ width: 40, height: 40 }}
+                                    resizeMode="contain"
+                                />
+                                <Callout>
+                                    <View style={{ padding: 5 }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{marker.city}</Text>
+                                        <Text>{marker.country}</Text>
+                                    </View>
+                                </Callout>
+                            </Marker>
+                        ))}
+                    </MapView>
 
-                    {/* Map with travel savings*/}
-                    <View style={{ flex: 1, position: 'relative' }}>
-                        <MapView style={{ flex: 1 }} region={mapRegion}>
-                            {markers.map((marker, index) => (
-                                <Marker key={index} coordinate={marker.coordinate}>
-                                    <Image
-                                        source={require("../../assets/icons/location.png")}
-                                        style={{ width: 40, height: 40 }}
-                                        resizeMode="contain"
-                                    />
-                                    <Callout>
-                                        <View style={{ padding: 5 }}>
-                                            <Text style={{ fontWeight: 'bold' }}>{marker.city}</Text>
-                                            <Text>{marker.country}</Text>
-                                        </View>
-                                    </Callout>
-                                </Marker>
-                            ))}
-                        </MapView>
+                    {/* Back button */}
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <MaterialIcons name="arrow-back" size={28} color="black" />
+                    </TouchableOpacity>
 
-                        {/* Back button */}
-                        <TouchableOpacity
-                            style={styles.backButton}
-                            onPress={() => navigation.goBack()}
-                        >
-                            <MaterialIcons name="arrow-back" size={28} color="black" />
-                        </TouchableOpacity>
-
-                        {/* Add new city */}
-                        <Card style={styles.inputCard}>
+                    {/* Add new city (now moves up with keyboard) */}
+                    <Animated.View style={[styles.inputCard, { bottom: Animated.add(65, keyboardOffset) }]}>
+                        <Card style={{ elevation: 5, padding: 10 }}>
                             <TextInput
                                 label="Enter city"
                                 value={searchText}
@@ -113,10 +139,11 @@ export default function TravelJournal() {
                                 Add City
                             </Button>
                         </Card>
-                    </View>
+                    </Animated.View>
 
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
+                </View>
+
+            </TouchableWithoutFeedback>
         </SafeAreaView >
     )
 }
