@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',   // float above the map
-        top: 40,                // distance from top (adjust for SafeArea)
+        top: 45,                // distance from top (adjust for SafeArea)
         left: 20,               // distance from left
         width: 45,              // width & height make it round
         height: 45,

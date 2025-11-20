@@ -54,8 +54,8 @@ export default function Home() {
 
                 {/* Button Travel Journal */}
                 <Button
-                    onPress={() => router.push("/screens/TravelJournal")}
-                    style={[styles.button, { backgroundColor: "#45d3e571", borderColor: "#13b32371", }]}
+                    onPress={() => router.push("/screens/TravelJournal_Main")}
+                    style={[styles.button, { backgroundColor: "#2784d65f", borderColor: "#05540d9a", }]}
                     mode="outlined"
                     icon={() => (
                         <Image
@@ -64,7 +64,7 @@ export default function Home() {
                         />
                     )}
                 >
-                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#13b32371" }]}>
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#05540d9a" }]}>
                         -------{">"} Travel Journal
                     </Text>
                 </Button>
