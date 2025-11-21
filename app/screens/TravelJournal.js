@@ -125,20 +125,14 @@ export default function TravelJournal() {
                                     source={require("../../assets/icons/location.png")}
                                     style={{ width: 40, height: 40 }}
                                     resizeMode="contain"
+                                    pointerEvents="none"
                                 />
                                 <Callout tooltip>
-                                    <View style={{
-                                        padding: 8,
-                                        minWidth: 150,          // ensures it's not too narrow
-                                        maxWidth: 250,          // limits overly long bubbles
-                                        backgroundColor: 'white',
-                                        borderRadius: 8,
-                                        alignItems: 'center',   // center text horizontally
-                                    }}>
+                                    <View style={styles.markerCallout}>
                                         <Text style={{ fontWeight: 'bold', fontFamily: "Audiowide_400Regular", fontSize: 16 }}>
                                             {marker.city},
                                         </Text>
-                                        <Text style={{ fontFamily: "Audiowide_400Regular", fontSize: 14, color: '#555' }}>
+                                        <Text style={{ fontSize: 14, color: '#555' }}>
                                             {marker.country}
                                         </Text>
                                     </View>
@@ -206,5 +200,13 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
+    },
+    markerCallout: {
+        padding: 8,
+        minWidth: 150,          // ensures it's not too narrow
+        maxWidth: 250,          // limits overly long bubbles
+        backgroundColor: 'white',
+        borderRadius: 8,
+        alignItems: 'center',   // center text horizontally
     },
 })
