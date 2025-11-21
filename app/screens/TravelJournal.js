@@ -152,18 +152,31 @@ export default function TravelJournal() {
 
                     {/* Add new city (now moves up with keyboard) */}
                     <Animated.View style={[styles.inputCard, { bottom: Animated.add(65, keyboardOffset) }]}>
-                        <Card style={{ elevation: 5, padding: 10 }}>
+                        <Card style={[styles.greenCard, { elevation: 5, padding: 10 }]}>
                             <TextInput
                                 label="Enter city"
                                 value={searchText}
                                 onChangeText={setSearchText}
-                                style={{ backgroundColor: 'white' }}
+                                style={{ backgroundColor: 'transparent' }}
+                                theme={{
+                                    colors: {
+                                        text: "#05540d",        // typed text
+                                        primary: "#05540d",     // floating label & underline when focused
+                                        placeholder: "#05540d9a" // inactive placeholder
+                                    }
+                                }}
                             />
-                            <Button mode="contained" onPress={handleAddCity} style={{ marginTop: 8 }}>
+                            <Button
+                                mode="contained"
+                                onPress={handleAddCity}
+                                style={[styles.greenButton, { marginTop: 8 }]}
+                                labelStyle={{ color: 'white' }}
+                            >
                                 Add City
                             </Button>
                         </Card>
                     </Animated.View>
+
 
                 </View>
 
@@ -177,14 +190,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#45d2e58b",
     },
+    //Input new city
     inputCard: {
         position: 'absolute',
         bottom: 65,
         left: 20,
         right: 20,
         padding: 10,
-        elevation: 5,
     },
+    greenCard: {
+        backgroundColor: '#f6f6f6ff', // your green color
+        borderRadius: 10,
+    },
+    greenButton: {
+        backgroundColor: "#05540d9a", // slightly darker green for contrast
+    },
+    //Arrow back
     backButton: {
         position: 'absolute',   // float above the map
         top: 45,                // distance from top (adjust for SafeArea)
