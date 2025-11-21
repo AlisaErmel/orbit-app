@@ -10,13 +10,14 @@ import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebaseConfig';
 import { ref, push, onValue } from 'firebase/database';
 
+const MARKER_ICON = require('../../assets/icons/location.png');
+
 export default function TravelJournal() {
 
-    const [fontsLoaded] = useFonts({
-        Audiowide_400Regular,
-    });
+    useFonts({ Audiowide_400Regular });
 
     const navigation = useNavigation();
+    const mapRef = useRef(null);
 
     const [mapRegion, setMapRegion] = useState({
         latitude: 48.8566,
@@ -25,13 +26,12 @@ export default function TravelJournal() {
         longitudeDelta: 10,
     });
 
-    const mapRef = useRef(null);   // <<<<<< ADDED
-
     const [searchText, setSearchText] = useState('');
     const [markers, setMarkers] = useState([]);
 
     const keyboardOffset = useState(new Animated.Value(0))[0];
 
+    // Keyboard animation
     useEffect(() => {
         const show = Keyboard.addListener("keyboardWillShow", (e) => {
             Animated.timing(keyboardOffset, {
@@ -49,57 +49,65 @@ export default function TravelJournal() {
             }).start();
         });
 
-        return () => {
-            show.remove();
-            hide.remove();
-        };
+        return () => { show.remove(); hide.remove(); };
     }, []);
 
+    // Load markers
     useEffect(() => {
         const markersRef = ref(db, 'traveljournal/');
         onValue(markersRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                const loadedMarkers = Object.values(data).map(m => ({
+                const loaded = Object.values(data).map(m => ({
                     city: m.city,
                     country: m.country,
                     coordinate: { latitude: m.latitude, longitude: m.longitude },
-                    image: require('../../assets/icons/location.png'),
+                    image: MARKER_ICON,
                 }));
-                setMarkers(loadedMarkers);
+                setMarkers(loaded);
             }
         });
     }, []);
+
+    const zoomToMarker = (coord) => {
+        mapRef.current?.animateToRegion({
+            ...coord,
+            latitudeDelta: 0.5,
+            longitudeDelta: 0.5,
+        }, 800);
+    };
 
     const handleAddCity = async () => {
         if (!searchText) return;
 
         try {
             const geocode = await Location.geocodeAsync(searchText);
-            if (geocode.length > 0) {
-                const { latitude, longitude } = geocode[0];
-                const [locationInfo] = await Location.reverseGeocodeAsync({ latitude, longitude });
-                const country = locationInfo?.country || 'Unknown';
+            if (!geocode.length) return;
 
-                const newMarker = {
+            const { latitude, longitude } = geocode[0];
+            const [info] = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+            const country = info?.country || 'Unknown';
+
+            const newMarker = { city: searchText, country, latitude, longitude };
+
+            push(ref(db, 'traveljournal/'), newMarker);
+
+            setMarkers(prev => [
+                ...prev,
+                {
                     city: searchText,
                     country,
-                    latitude,
-                    longitude,
-                };
+                    coordinate: { latitude, longitude },
+                    image: MARKER_ICON
+                }
+            ]);
 
-                push(ref(db, 'traveljournal/'), newMarker);
+            setMapRegion(r => ({ ...r, latitude, longitude }));
 
-                setMarkers(prev => [
-                    ...prev,
-                    { ...newMarker, image: require('../../assets/icons/location.png'), coordinate: { latitude, longitude } }
-                ]);
+            setSearchText('');
+            Keyboard.dismiss();
 
-                setMapRegion({ ...mapRegion, latitude, longitude });
-
-                setSearchText('');
-                Keyboard.dismiss();
-            }
         } catch (err) {
             console.log("Error:", err);
         }
@@ -107,58 +115,42 @@ export default function TravelJournal() {
 
     return (
         <SafeAreaView style={styles.container} edges={[]}>
-
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={{ flex: 1 }}>
 
-                <View style={{ flex: 1, position: 'relative' }}>
+                    {/* MAP */}
                     <MapView
-                        ref={mapRef}     // <<<<<< ADDED
+                        ref={mapRef}
                         style={{ flex: 1 }}
                         region={mapRegion}
                     >
-                        {markers.map((marker, index) => (
+                        {markers.map((marker, i) => (
                             <Marker
-                                key={index}
+                                key={i}
                                 coordinate={marker.coordinate}
-                                onPress={() => {
-                                    mapRef.current?.animateToRegion(
-                                        {
-                                            latitude: marker.coordinate.latitude,
-                                            longitude: marker.coordinate.longitude,
-                                            latitudeDelta: 0.5,
-                                            longitudeDelta: 0.5,
-                                        },
-                                        800
-                                    );
-                                }}  // <<<<<< ZOOM ADDED
+                                onPress={() => zoomToMarker(marker.coordinate)}
                             >
                                 <Image
-                                    source={require("../../assets/icons/location.png")}
+                                    source={MARKER_ICON}
                                     style={{ width: 40, height: 40 }}
                                     resizeMode="contain"
-                                    pointerEvents="none"
                                 />
                                 <Callout tooltip>
                                     <View style={styles.markerCallout}>
-                                        <Text style={{ fontWeight: 'bold', fontFamily: "Audiowide_400Regular", fontSize: 16 }}>
-                                            {marker.city},
-                                        </Text>
-                                        <Text style={{ fontSize: 14, color: '#555' }}>
-                                            {marker.country}
-                                        </Text>
+                                        <Text style={styles.calloutCity}>{marker.city},</Text>
+                                        <Text style={styles.calloutCountry}>{marker.country}</Text>
                                     </View>
                                 </Callout>
                             </Marker>
                         ))}
                     </MapView>
 
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => navigation.goBack()}
-                    >
+                    {/* BACK BUTTON */}
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <MaterialIcons name="arrow-back" size={28} color="black" />
                     </TouchableOpacity>
 
+                    {/* ADD CITY INPUT */}
                     <Animated.View style={[styles.inputCard, { bottom: Animated.add(65, keyboardOffset) }]}>
                         <Card style={[styles.greenCard, { elevation: 5, padding: 10 }]}>
                             <TextInput
@@ -184,19 +176,16 @@ export default function TravelJournal() {
                             </Button>
                         </Card>
                     </Animated.View>
-                </View>
 
+                </View>
             </TouchableWithoutFeedback>
         </SafeAreaView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#45d2e58b",
-    },
-    //Input new city
+    container: { flex: 1, backgroundColor: "#45d2e58b" },
+
     inputCard: {
         position: 'absolute',
         bottom: 65,
@@ -204,36 +193,48 @@ const styles = StyleSheet.create({
         right: 20,
         padding: 10,
     },
+
     greenCard: {
-        backgroundColor: '#f6f6f6ff', // your green color
+        backgroundColor: '#f6f6f6',
         borderRadius: 10,
     },
+
     greenButton: {
-        backgroundColor: "#05540d9a", // slightly darker green for contrast
+        backgroundColor: "#05540d9a",
     },
-    //Arrow back
+
     backButton: {
-        position: 'absolute',   // float above the map
-        top: 45,                // distance from top (adjust for SafeArea)
-        left: 20,               // distance from left
-        width: 45,              // width & height make it round
+        position: 'absolute',
+        top: 45,
+        left: 20,
+        width: 45,
         height: 45,
-        borderRadius: 22.5,     // half of width/height for circle
-        backgroundColor: 'white', // or any color
+        borderRadius: 22.5,
+        backgroundColor: 'white',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,           // shadow on Android
-        shadowColor: '#000',    // shadow for iOS
+        elevation: 5,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
     },
+
     markerCallout: {
         padding: 8,
-        minWidth: 150,          // ensures it's not too narrow
-        maxWidth: 250,          // limits overly long bubbles
+        minWidth: 150,
+        maxWidth: 250,
         backgroundColor: 'white',
         borderRadius: 8,
-        alignItems: 'center',   // center text horizontally
+        alignItems: 'center',
     },
-})
+    calloutCity: {
+        fontWeight: 'bold',
+        fontFamily: "Audiowide_400Regular",
+        fontSize: 16,
+    },
+    calloutCountry: {
+        fontSize: 14,
+        color: '#555',
+    },
+});
