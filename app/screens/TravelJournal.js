@@ -126,12 +126,24 @@ export default function TravelJournal() {
                                     style={{ width: 40, height: 40 }}
                                     resizeMode="contain"
                                 />
-                                <Callout>
-                                    <View style={{ padding: 5 }}>
-                                        <Text style={{ fontWeight: 'bold' }}>{marker.city}</Text>
-                                        <Text>{marker.country}</Text>
+                                <Callout tooltip>
+                                    <View style={{
+                                        padding: 8,
+                                        minWidth: 150,          // ensures it's not too narrow
+                                        maxWidth: 250,          // limits overly long bubbles
+                                        backgroundColor: 'white',
+                                        borderRadius: 8,
+                                        alignItems: 'center',   // center text horizontally
+                                    }}>
+                                        <Text style={{ fontWeight: 'bold', fontFamily: "Audiowide_400Regular", fontSize: 16 }}>
+                                            {marker.city},
+                                        </Text>
+                                        <Text style={{ fontFamily: "Audiowide_400Regular", fontSize: 14, color: '#555' }}>
+                                            {marker.country}
+                                        </Text>
                                     </View>
                                 </Callout>
+
                             </Marker>
                         ))}
                     </MapView>
