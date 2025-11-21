@@ -7,6 +7,8 @@ import * as Location from 'expo-location';
 import { TextInput, Button, Card, Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons'; // arrow icon
 import { useNavigation } from '@react-navigation/native';
+import { db } from '../../firebaseConfig';
+import { ref, push, onValue } from 'firebase/database';
 
 export default function TravelJournal() {
     //Font
@@ -53,43 +55,59 @@ export default function TravelJournal() {
         };
     }, []);
 
+    // Load markers from Firebase on mount
+    useEffect(() => {
+        const markersRef = ref(db, 'traveljournal/');
+        onValue(markersRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const loadedMarkers = Object.values(data).map(m => ({
+                    city: m.city,
+                    country: m.country,
+                    coordinate: { latitude: m.latitude, longitude: m.longitude },
+                    image: require('../../assets/icons/location.png'),
+                }));
+                setMarkers(loadedMarkers);
+            }
+        });
+    }, []);
 
+
+    // Add a new city
     const handleAddCity = async () => {
         if (!searchText) return;
 
         try {
-            // Geocode the city
             const geocode = await Location.geocodeAsync(searchText);
-
             if (geocode.length > 0) {
                 const { latitude, longitude } = geocode[0];
-
-                // Reverse geocode to get country
                 const [locationInfo] = await Location.reverseGeocodeAsync({ latitude, longitude });
-
                 const country = locationInfo?.country || 'Unknown';
 
-                // Add marker
                 const newMarker = {
-                    coordinate: { latitude, longitude },
                     city: searchText,
                     country,
-                    image: require('../../assets/icons/location.png'), // my custom PNG marker
+                    latitude,
+                    longitude,
                 };
 
-                setMarkers((prev) => [...prev, newMarker]);
+                // Save to Firebase
+                push(ref(db, 'traveljournal/'), newMarker);
+
+                // Add locally for instant update
+                setMarkers(prev => [
+                    ...prev,
+                    { ...newMarker, image: require('../../assets/icons/location.png'), coordinate: { latitude, longitude } }
+                ]);
 
                 // Center map
                 setMapRegion({ ...mapRegion, latitude, longitude });
 
-                // Clear input
                 setSearchText('');
-
-                //Hide input
                 Keyboard.dismiss();
             }
         } catch (err) {
-            console.log('Error:', err);
+            console.log("Error:", err);
         }
     };
 
