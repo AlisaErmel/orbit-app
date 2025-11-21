@@ -19,12 +19,16 @@ export default function TravelJournal() {
     const navigation = useNavigation();
     const mapRef = useRef(null);
 
-    const [mapRegion, setMapRegion] = useState({
+    // Track original big region
+    const initialRegion = {
         latitude: 48.8566,
         longitude: 2.3522,
-        latitudeDelta: 10,
-        longitudeDelta: 10,
-    });
+        latitudeDelta: 60,
+        longitudeDelta: 60,
+    };
+
+    const [mapRegion, setMapRegion] = useState(initialRegion);
+    const [isZoomed, setIsZoomed] = useState(false);
 
     const [searchText, setSearchText] = useState('');
     const [markers, setMarkers] = useState([]);
@@ -69,7 +73,9 @@ export default function TravelJournal() {
         });
     }, []);
 
+    // Zoom in on marker
     const zoomToMarker = (coord) => {
+        setIsZoomed(true);
         mapRef.current?.animateToRegion({
             ...coord,
             latitudeDelta: 0.5,
@@ -77,7 +83,7 @@ export default function TravelJournal() {
         }, 800);
     };
 
-    //Add new city
+    // Add new city
     const handleAddCity = async () => {
         if (!searchText) return;
 
@@ -124,6 +130,13 @@ export default function TravelJournal() {
                         ref={mapRef}
                         style={{ flex: 1 }}
                         region={mapRegion}
+                        onPress={() => {
+                            // Zoom out if map was zoomed in
+                            if (isZoomed) {
+                                mapRef.current?.animateToRegion(initialRegion, 800);
+                                setIsZoomed(false);
+                            }
+                        }}
                     >
                         {markers.map((marker, i) => (
                             <Marker
@@ -136,6 +149,7 @@ export default function TravelJournal() {
                                     style={{ width: 40, height: 40 }}
                                     resizeMode="contain"
                                 />
+
                                 <Callout tooltip>
                                     <View style={styles.markerCallout}>
                                         <Text style={styles.calloutCity}>{marker.city},</Text>
@@ -167,6 +181,7 @@ export default function TravelJournal() {
                                     }
                                 }}
                             />
+
                             <Button
                                 mode="contained"
                                 onPress={handleAddCity}
@@ -197,7 +212,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     greenCard: {
-        backgroundColor: '#f6f6f6',
+        backgroundColor: '#ffffffff',
         borderRadius: 10,
     },
     greenButton: {
