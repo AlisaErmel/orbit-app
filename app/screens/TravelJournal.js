@@ -1,22 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Image, View, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Animated } from "react-native";
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { TextInput, Button, Card, Text } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons'; // arrow icon
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebaseConfig';
 import { ref, push, onValue } from 'firebase/database';
 
 export default function TravelJournal() {
-    //Font
+
     const [fontsLoaded] = useFonts({
         Audiowide_400Regular,
     });
 
-    //For an arrow
     const navigation = useNavigation();
 
     const [mapRegion, setMapRegion] = useState({
@@ -26,10 +25,11 @@ export default function TravelJournal() {
         longitudeDelta: 10,
     });
 
+    const mapRef = useRef(null);   // <<<<<< ADDED
+
     const [searchText, setSearchText] = useState('');
     const [markers, setMarkers] = useState([]);
 
-    //Track keyboard height
     const keyboardOffset = useState(new Animated.Value(0))[0];
 
     useEffect(() => {
@@ -55,7 +55,6 @@ export default function TravelJournal() {
         };
     }, []);
 
-    // Load markers from Firebase on mount
     useEffect(() => {
         const markersRef = ref(db, 'traveljournal/');
         onValue(markersRef, (snapshot) => {
@@ -72,8 +71,6 @@ export default function TravelJournal() {
         });
     }, []);
 
-
-    // Add a new city
     const handleAddCity = async () => {
         if (!searchText) return;
 
@@ -91,16 +88,13 @@ export default function TravelJournal() {
                     longitude,
                 };
 
-                // Save to Firebase
                 push(ref(db, 'traveljournal/'), newMarker);
 
-                // Add locally for instant update
                 setMarkers(prev => [
                     ...prev,
                     { ...newMarker, image: require('../../assets/icons/location.png'), coordinate: { latitude, longitude } }
                 ]);
 
-                // Center map
                 setMapRegion({ ...mapRegion, latitude, longitude });
 
                 setSearchText('');
@@ -114,13 +108,30 @@ export default function TravelJournal() {
     return (
         <SafeAreaView style={styles.container} edges={[]}>
 
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-                {/* Map with travel savings*/}
                 <View style={{ flex: 1, position: 'relative' }}>
-                    <MapView style={{ flex: 1 }} region={mapRegion}>
+                    <MapView
+                        ref={mapRef}     // <<<<<< ADDED
+                        style={{ flex: 1 }}
+                        region={mapRegion}
+                    >
                         {markers.map((marker, index) => (
-                            <Marker key={index} coordinate={marker.coordinate}>
+                            <Marker
+                                key={index}
+                                coordinate={marker.coordinate}
+                                onPress={() => {
+                                    mapRef.current?.animateToRegion(
+                                        {
+                                            latitude: marker.coordinate.latitude,
+                                            longitude: marker.coordinate.longitude,
+                                            latitudeDelta: 0.5,
+                                            longitudeDelta: 0.5,
+                                        },
+                                        800
+                                    );
+                                }}  // <<<<<< ZOOM ADDED
+                            >
                                 <Image
                                     source={require("../../assets/icons/location.png")}
                                     style={{ width: 40, height: 40 }}
@@ -137,12 +148,10 @@ export default function TravelJournal() {
                                         </Text>
                                     </View>
                                 </Callout>
-
                             </Marker>
                         ))}
                     </MapView>
 
-                    {/* Back button */}
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigation.goBack()}
@@ -150,7 +159,6 @@ export default function TravelJournal() {
                         <MaterialIcons name="arrow-back" size={28} color="black" />
                     </TouchableOpacity>
 
-                    {/* Add new city (now moves up with keyboard) */}
                     <Animated.View style={[styles.inputCard, { bottom: Animated.add(65, keyboardOffset) }]}>
                         <Card style={[styles.greenCard, { elevation: 5, padding: 10 }]}>
                             <TextInput
@@ -160,9 +168,9 @@ export default function TravelJournal() {
                                 style={{ backgroundColor: 'transparent' }}
                                 theme={{
                                     colors: {
-                                        text: "#05540d",        // typed text
-                                        primary: "#05540d",     // floating label & underline when focused
-                                        placeholder: "#05540d9a" // inactive placeholder
+                                        text: "#05540d",
+                                        primary: "#05540d",
+                                        placeholder: "#05540d9a"
                                     }
                                 }}
                             />
@@ -176,12 +184,10 @@ export default function TravelJournal() {
                             </Button>
                         </Card>
                     </Animated.View>
-
-
                 </View>
 
             </TouchableWithoutFeedback>
-        </SafeAreaView >
+        </SafeAreaView>
     )
 }
 
