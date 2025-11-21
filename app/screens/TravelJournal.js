@@ -77,6 +77,7 @@ export default function TravelJournal() {
         }, 800);
     };
 
+    //Add new city
     const handleAddCity = async () => {
         if (!searchText) return;
 
@@ -184,8 +185,10 @@ export default function TravelJournal() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#45d2e58b" },
-
+    container: {
+        flex: 1
+    },
+    //Inpu Card for new city
     inputCard: {
         position: 'absolute',
         bottom: 65,
@@ -193,16 +196,14 @@ const styles = StyleSheet.create({
         right: 20,
         padding: 10,
     },
-
     greenCard: {
         backgroundColor: '#f6f6f6',
         borderRadius: 10,
     },
-
     greenButton: {
         backgroundColor: "#05540d9a",
     },
-
+    //Arrow back button
     backButton: {
         position: 'absolute',
         top: 45,
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 3,
     },
-
+    //Marker
     markerCallout: {
         padding: 8,
         minWidth: 150,
