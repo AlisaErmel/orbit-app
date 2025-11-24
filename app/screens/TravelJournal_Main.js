@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
     },
     travelJournal: {
-        color: "#05540d9a",
+        color: "#05540dbf",
     },
     image: {
         height: 250, // fixed height
