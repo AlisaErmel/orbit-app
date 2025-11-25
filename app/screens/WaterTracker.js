@@ -15,6 +15,16 @@ export default function WaterTracker() {
     const [waterModalVisible, setWaterModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    //congratulations
+    const [congratsVisible, setCongratsVisible] = useState(false);
+
+    useEffect(() => {
+        if (water >= goal) {
+            setCongratsVisible(true);
+        }
+    }, [water, goal]);
+
+
     const animatedProgress = useRef(new Animated.Value(0)).current;
 
     const radius = 130;
@@ -229,6 +239,38 @@ export default function WaterTracker() {
                     </View>
                 </View>
             </Modal>
+
+
+            {/* Congratulations Modal */}
+            <Modal visible={congratsVisible} transparent animationType="slide">
+                <View style={styles.modalBackground}>
+                    <View style={styles.congratsContainer}>
+                        <Text style={[styles.congratsTitle, { fontFamily: "Audiowide_400Regular" }]}>
+                            🎉 Congratulations!
+                        </Text>
+                        <Text style={[styles.congratsText, { fontFamily: "Audiowide_400Regular" }]}>
+                            You reached your daily water goal!
+                        </Text>
+
+                        {/* Awards icons */}
+                        <View style={styles.awardsContainer}>
+                            <MaterialIcons name="emoji-events" size={40} color="#FFD700" />
+                            <MaterialIcons name="local-drink" size={40} color="#0a627bff" />
+                            <MaterialIcons name="star" size={40} color="#FF6347" />
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.closeCongratsBtn}
+                            onPress={() => setCongratsVisible(false)}
+                        >
+                            <Text style={[styles.closeCongratsText, { fontFamily: "Audiowide_400Regular" }]}>
+                                Close
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
         </SafeAreaView >
     );
 }
@@ -268,7 +310,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0a627bff",
         borderRadius: 30,
         flexDirection: "row",
-        alignItems: "center",       // center icon and text vertically
+        alignItems: "center",  // center icon and text vertically
     },
     addButtonText: {
         fontSize: 20,
@@ -334,6 +376,41 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     saveText: {
+        color: "white",
+        fontSize: 18,
+    },
+    //congratulations
+    congratsContainer: {
+        width: "80%",
+        backgroundColor: "white",
+        padding: 25,
+        borderRadius: 20,
+        alignItems: "center",
+    },
+    congratsTitle: {
+        fontSize: 26,
+        color: "#0a627bff",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    congratsText: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    awardsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "100%",
+        marginBottom: 20,
+    },
+    closeCongratsBtn: {
+        backgroundColor: "#0a627bff",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+    },
+    closeCongratsText: {
         color: "white",
         fontSize: 18,
     },
