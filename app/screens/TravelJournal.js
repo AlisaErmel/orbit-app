@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebaseConfig';
 import { ref, push, onValue } from 'firebase/database';
 
-const MARKER_ICON = require('../../assets/icons/location.png');
+const MARKER_ICON = require('../../assets/icons/location_light.png');
 
 export default function TravelJournal() {
 

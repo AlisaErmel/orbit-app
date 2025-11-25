@@ -1,8 +1,10 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, StyleSheet, View, TouchableOpacity, Modal, Animated, TextInput } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, Modal, Animated, TextInput, ActivityIndicator } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import Svg, { Circle } from "react-native-svg";
+import { db } from "../../firebaseConfig";
+import { ref, onValue, set } from "firebase/database";
 
 export default function WaterTracker() {
     const [water, setWater] = useState(0);
@@ -10,16 +12,21 @@ export default function WaterTracker() {
     const [goalInput, setGoalInput] = useState("");
     const [goalModalVisible, setGoalModalVisible] = useState(false);
     const [waterModalVisible, setWaterModalVisible] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const animatedProgress = useRef(new Animated.Value(0)).current;
 
     const radius = 130;
     const strokeWidth = 15;
     const circumference = 2 * Math.PI * radius;
-
     const progress = water / goal;
 
-    // Animate circle when water OR goal changes
+    const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+    const [fontsLoaded] = useFonts({ Audiowide_400Regular });
+    const isLoading = loading || !fontsLoaded;
+
+    // --- Animate circle ---
     useEffect(() => {
         Animated.timing(animatedProgress, {
             toValue: progress,
@@ -33,24 +40,68 @@ export default function WaterTracker() {
         outputRange: [circumference, 0],
     });
 
-    const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+    // --- Get today's date ---
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-    const [fontsLoaded] = useFonts({ Audiowide_400Regular });
-    if (!fontsLoaded) return null;
+    // --- Firebase: load today's water tracker ---
+    useEffect(() => {
+        const waterRef = ref(db, `/watertracker/${today}`);
 
+        const unsubscribe = onValue(waterRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                setWater(data.water);
+                setGoal(data.goal);
+            } else {
+                setWater(0);
+                setGoal(2000);
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [today]);
+
+    // --- Update water in Firebase ---
     function addWater(amount) {
-        setWater(prev => Math.min(prev + amount, goal));
+        setWater((prevWater) => {
+            const newWater = Math.min(prevWater + amount, goal);
+            const waterRef = ref(db, `/watertracker/${today}`);
+            console.log("Saving to Firebase:", { date: today, water: newWater, goal });
+
+            set(waterRef, { date: today, water: newWater, goal })
+                .then(() => console.log("Saved successfully!"))
+                .catch(err => console.log("Firebase error:", err));
+
+            return newWater;
+        });
+
         setWaterModalVisible(false);
     }
 
+    // --- Update goal in Firebase ---
     function saveGoal() {
-        const newGoal = parseInt(goalInput);
+        const newGoal = parseInt(goalInput); // get new goal from input
         if (!isNaN(newGoal) && newGoal > 0) {
-            setGoal(newGoal);
-            setWater(0); // optional: reset progress
+            setGoal(newGoal); // update goal locally
+
+            // Save to Firebase, keep water the same
+            const waterRef = ref(db, `/watertracker/${today}`);
+            set(waterRef, { date: today, water, goal: newGoal })
+                .then(() => console.log("Goal updated, water unchanged!"))
+                .catch(err => console.log("Firebase error:", err));
         }
+
         setGoalInput("");
         setGoalModalVisible(false);
+    }
+
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <ActivityIndicator size="large" color="#0a627bff" />
+            </SafeAreaView>
+        );
     }
 
     return (
@@ -70,7 +121,6 @@ export default function WaterTracker() {
                         strokeWidth={strokeWidth}
                         fill="none"
                     />
-
                     <AnimatedCircle
                         stroke="#0a627bff"
                         cx="150"
@@ -121,13 +171,15 @@ export default function WaterTracker() {
                                 { label: "+250 ml", value: 250 },
                                 { label: "+500 ml", value: 500 },
                                 { label: "+1 L", value: 1000 },
-                            ].map(item => (
+                            ].map((item) => (
                                 <TouchableOpacity
                                     key={item.label}
                                     style={styles.amountBtn}
                                     onPress={() => addWater(item.value)}
                                 >
-                                    <Text style={[styles.amountText, { fontFamily: "Audiowide_400Regular" }]}>
+                                    <Text
+                                        style={[styles.amountText, { fontFamily: "Audiowide_400Regular" }]}
+                                    >
                                         {item.label}
                                     </Text>
                                 </TouchableOpacity>
