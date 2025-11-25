@@ -5,6 +5,7 @@ import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import Svg, { Circle } from "react-native-svg";
 import { db } from "../../firebaseConfig";
 import { ref, onValue, set } from "firebase/database";
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function WaterTracker() {
     const [water, setWater] = useState(0);
@@ -87,7 +88,7 @@ export default function WaterTracker() {
 
             // Save to Firebase, keep water the same
             const waterRef = ref(db, `/watertracker/${today}`);
-            set(waterRef, { date: today, water, goal: newGoal })
+            set(waterRef, { date: today, water: water, goal: newGoal })
                 .then(() => console.log("Goal updated, water unchanged!"))
                 .catch(err => console.log("Firebase error:", err));
         }
@@ -144,6 +145,7 @@ export default function WaterTracker() {
                 style={styles.addButton}
                 onPress={() => setWaterModalVisible(true)}
             >
+                <MaterialIcons name="local-drink" size={24} color="white" style={{ marginRight: 8 }} />
                 <Text style={[styles.addButtonText, { fontFamily: "Audiowide_400Regular" }]}>
                     Add Water
                 </Text>
@@ -153,6 +155,7 @@ export default function WaterTracker() {
                 style={styles.addButton}
                 onPress={() => setGoalModalVisible(true)}
             >
+                <MaterialIcons name="flag" size={24} color="white" style={{ marginRight: 8 }} />
                 <Text style={[styles.addButtonText, { fontFamily: "Audiowide_400Regular" }]}>
                     Set Daily Goal
                 </Text>
@@ -226,7 +229,7 @@ export default function WaterTracker() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -247,7 +250,8 @@ const styles = StyleSheet.create({
     circleContainer: {
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 30,
+        marginTop: 50,
+        marginBottom: 50,
     },
     waterText: {
         position: "absolute",
@@ -260,9 +264,11 @@ const styles = StyleSheet.create({
     addButton: {
         marginTop: 20,
         paddingVertical: 15,
-        paddingHorizontal: 40,
+        paddingHorizontal: 20,
         backgroundColor: "#0a627bff",
         borderRadius: 30,
+        flexDirection: "row",
+        alignItems: "center",       // center icon and text vertically
     },
     addButtonText: {
         fontSize: 20,
