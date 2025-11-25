@@ -78,7 +78,7 @@ export default function TravelJournal_Main() {
 
                 {/* Text 2 */}
                 <Text style={[styles.text, { fontFamily: "Audiowide_400Regular" }]}>
-                    EXPLORE AND ADD NEW PLACES:{")"}
+                    EXPLORE AND ADD NEW PLACES!
                 </Text>
 
             </View>
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
     mapButton: {
-        width: "80%",
+        width: "79%",
         backgroundColor: "#05540d9a",
-        paddingVertical: 8,
+        //paddingVertical: 8,
     },
     travelJournal: {
         color: "#05540dbf",
