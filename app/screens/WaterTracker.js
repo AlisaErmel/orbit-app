@@ -1,23 +1,25 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, StyleSheet, View, TouchableOpacity, Modal, Animated } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, Modal, Animated, TextInput } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import Svg, { Circle } from "react-native-svg";
 
 export default function WaterTracker() {
     const [water, setWater] = useState(0);
-    const goal = 2000;
-    const [modalVisible, setModalVisible] = useState(false);
+    const [goal, setGoal] = useState(2000);
+    const [goalInput, setGoalInput] = useState("");
+    const [goalModalVisible, setGoalModalVisible] = useState(false);
+    const [waterModalVisible, setWaterModalVisible] = useState(false);
 
     const animatedProgress = useRef(new Animated.Value(0)).current;
 
-    const radius = 120;
+    const radius = 130;
     const strokeWidth = 15;
     const circumference = 2 * Math.PI * radius;
 
     const progress = water / goal;
 
-    // Animate circle when water changes
+    // Animate circle when water OR goal changes
     useEffect(() => {
         Animated.timing(animatedProgress, {
             toValue: progress,
@@ -31,12 +33,24 @@ export default function WaterTracker() {
         outputRange: [circumference, 0],
     });
 
+    const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
     const [fontsLoaded] = useFonts({ Audiowide_400Regular });
     if (!fontsLoaded) return null;
 
     function addWater(amount) {
         setWater(prev => Math.min(prev + amount, goal));
-        setModalVisible(false);
+        setWaterModalVisible(false);
+    }
+
+    function saveGoal() {
+        const newGoal = parseInt(goalInput);
+        if (!isNaN(newGoal) && newGoal > 0) {
+            setGoal(newGoal);
+            setWater(0); // optional: reset progress
+        }
+        setGoalInput("");
+        setGoalModalVisible(false);
     }
 
     return (
@@ -58,7 +72,7 @@ export default function WaterTracker() {
                     />
 
                     <AnimatedCircle
-                        stroke="#0a7d6b"
+                        stroke="#0a627bff"
                         cx="150"
                         cy="150"
                         r={radius}
@@ -71,23 +85,36 @@ export default function WaterTracker() {
                 </Svg>
 
                 <Text style={[styles.waterText, { fontFamily: "Audiowide_400Regular" }]}>
-                    {(water / 1000).toFixed(2)} L
+                    {(water / 1000).toFixed(2)} L / {(goal / 1000).toFixed(1)} L
                 </Text>
             </View>
 
-            {/* Add button */}
+            {/* Buttons */}
             <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => setModalVisible(true)}
+                onPress={() => setWaterModalVisible(true)}
             >
-                <Text style={[styles.addButtonText, { fontFamily: "Audiowide_400Regular" }]}>Add Water</Text>
+                <Text style={[styles.addButtonText, { fontFamily: "Audiowide_400Regular" }]}>
+                    Add Water
+                </Text>
             </TouchableOpacity>
 
-            {/* Modal */}
-            <Modal visible={modalVisible} transparent animationType="slide">
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setGoalModalVisible(true)}
+            >
+                <Text style={[styles.addButtonText, { fontFamily: "Audiowide_400Regular" }]}>
+                    Set Daily Goal
+                </Text>
+            </TouchableOpacity>
+
+            {/* Water Modal */}
+            <Modal visible={waterModalVisible} transparent animationType="slide">
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
-                        <Text style={[styles.modalTitle, { fontFamily: "Audiowide_400Regular" }]}>Add Water</Text>
+                        <Text style={[styles.modalTitle, { fontFamily: "Audiowide_400Regular" }]}>
+                            Add Water
+                        </Text>
 
                         <View style={styles.amountButtons}>
                             {[
@@ -100,13 +127,49 @@ export default function WaterTracker() {
                                     style={styles.amountBtn}
                                     onPress={() => addWater(item.value)}
                                 >
-                                    <Text style={[styles.amountText, { fontFamily: "Audiowide_400Regular" }]}>{item.label}</Text>
+                                    <Text style={[styles.amountText, { fontFamily: "Audiowide_400Regular" }]}>
+                                        {item.label}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
 
-                        <TouchableOpacity onPress={() => setModalVisible(false)}>
-                            <Text style={[styles.closeModal, { fontFamily: "Audiowide_400Regular" }]}>Close</Text>
+                        <TouchableOpacity onPress={() => setWaterModalVisible(false)}>
+                            <Text style={[styles.closeModal, { fontFamily: "Audiowide_400Regular" }]}>
+                                Close
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Goal Modal */}
+            <Modal visible={goalModalVisible} transparent animationType="slide">
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={[styles.modalTitle, { fontFamily: "Audiowide_400Regular" }]}>
+                            Set Daily Goal (ml)
+                        </Text>
+
+                        <TextInput
+                            style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
+                            keyboardType="numeric"
+                            value={goalInput}
+                            onChangeText={setGoalInput}
+                            placeholder="Enter amount in ml"
+                            placeholderTextColor="#00030474"
+                        />
+
+                        <TouchableOpacity style={styles.saveBtn} onPress={saveGoal}>
+                            <Text style={[styles.saveText, { fontFamily: "Audiowide_400Regular" }]}>
+                                Save Goal
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => setGoalModalVisible(false)}>
+                            <Text style={[styles.closeModal, { fontFamily: "Audiowide_400Regular" }]}>
+                                Cancel
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -115,9 +178,8 @@ export default function WaterTracker() {
     );
 }
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
 const styles = StyleSheet.create({
+    //main
     container: {
         flex: 1,
         backgroundColor: "#b0e5ef71",
@@ -125,11 +187,11 @@ const styles = StyleSheet.create({
     },
     heading: {
         fontSize: 34,
-        color: "#044536b8",
+        color: "#0a627bff",
         marginTop: 20,
         marginBottom: 10,
-        textAlign: "center",
     },
+    //circle
     circleContainer: {
         justifyContent: "center",
         alignItems: "center",
@@ -137,15 +199,17 @@ const styles = StyleSheet.create({
     },
     waterText: {
         position: "absolute",
-        fontSize: 32,
+        fontSize: 26,
         fontWeight: "bold",
-        color: "#044536",
+        color: "#043745b8",
+        textAlign: "center",
     },
+    //add buttons
     addButton: {
-        marginTop: 40,
+        marginTop: 20,
         paddingVertical: 15,
         paddingHorizontal: 40,
-        backgroundColor: "#088c71",
+        backgroundColor: "#0a627bff",
         borderRadius: 30,
     },
     addButtonText: {
@@ -153,6 +217,7 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "600",
     },
+    //modal
     modalBackground: {
         flex: 1,
         justifyContent: "center",
@@ -168,6 +233,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         marginBottom: 20,
+        color: "#0a627bff",
     },
     amountButtons: {
         flexDirection: "column",
@@ -175,9 +241,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     amountBtn: {
-        backgroundColor: "#0a7d6b",
+        backgroundColor: "#0a627bff",
         padding: 10,
         borderRadius: 10,
+        width: 140,
+        alignItems: "center",
     },
     amountText: {
         color: "white",
@@ -187,5 +255,28 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 16,
         color: "#555",
+    },
+    //day goal input
+    input: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        width: "100%",
+        padding: 12,
+        marginBottom: 15,
+        borderRadius: 8,
+        fontSize: 18,
+        textAlign: "center",
+    },
+    saveBtn: {
+        backgroundColor: "#0a627bff",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        width: "100%",
+        alignItems: "center",
+    },
+    saveText: {
+        color: "white",
+        fontSize: 18,
     },
 });
