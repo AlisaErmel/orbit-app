@@ -1,13 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-    StyleSheet,
-    Text,
-    View,
-    TextInput,
-    TouchableOpacity,
-    Image,
-    FlatList,
-} from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, FlatList, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -30,6 +22,8 @@ export default function BookTracker({ navigation }) {
 
     // Search books
     const searchBooks = async () => {
+        Keyboard.dismiss();
+
         let query = [];
 
         if (title) query.push(`intitle:${title}`);
@@ -100,66 +94,68 @@ export default function BookTracker({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <SafeAreaView style={styles.container}>
 
-            {/* Heading + Saved Heart */}
-            <View style={styles.headerRow}>
-                <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>
-                    BOOK TRACKER
-                </Text>
+                {/* Heading + Saved Heart */}
+                <View style={styles.headerRow}>
+                    <Text style={[styles.heading, { fontFamily: "Audiowide_400Regular" }]}>
+                        BOOK TRACKER
+                    </Text>
 
-                <TouchableOpacity onPress={() => navigation.navigate("SavedBooks", { saved })}>
-                    <Ionicons name="heart" size={33} color="#3e0445c5" />
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity onPress={() => navigation.navigate("SavedBooks", { saved })}>
+                        <Ionicons name="heart" size={33} color="#3e0445c5" />
+                    </TouchableOpacity>
+                </View>
 
-            {/* Search inputs */}
-            <View style={styles.searchBlock}>
-                <TextInput
-                    placeholder="Search by title"
-                    placeholderTextColor="#3e0445c5"
-                    style={styles.input}
-                    value={title}
-                    onChangeText={setTitle}
+                {/* Search inputs */}
+                <View style={styles.searchBlock}>
+                    <TextInput
+                        placeholder="Search by title"
+                        placeholderTextColor="#3e0445c5"
+                        style={styles.input}
+                        value={title}
+                        onChangeText={setTitle}
+                    />
+
+                    <TextInput
+                        placeholder="Search by author"
+                        placeholderTextColor="#3e0445c5"
+                        style={styles.input}
+                        value={author}
+                        onChangeText={setAuthor}
+                    />
+
+                    <TextInput
+                        placeholder="Search by genre/subject"
+                        placeholderTextColor="#3e0445c5"
+                        style={styles.input}
+                        value={subject}
+                        onChangeText={setSubject}
+                    />
+
+                    <TextInput
+                        placeholder="Language (en, de, ru...)"
+                        placeholderTextColor="#3e0445c5"
+                        style={styles.input}
+                        value={lang}
+                        onChangeText={setLang}
+                    />
+
+                    <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
+                        <Text style={styles.searchBtnText}>SEARCH</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Results */}
+                <FlatList
+                    data={books}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderBook}
+                    contentContainerStyle={{ paddingBottom: 100 }}
                 />
-
-                <TextInput
-                    placeholder="Search by author"
-                    placeholderTextColor="#3e0445c5"
-                    style={styles.input}
-                    value={author}
-                    onChangeText={setAuthor}
-                />
-
-                <TextInput
-                    placeholder="Search by genre/subject"
-                    placeholderTextColor="#3e0445c5"
-                    style={styles.input}
-                    value={subject}
-                    onChangeText={setSubject}
-                />
-
-                <TextInput
-                    placeholder="Language (en, de, ru...)"
-                    placeholderTextColor="#3e0445c5"
-                    style={styles.input}
-                    value={lang}
-                    onChangeText={setLang}
-                />
-
-                <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
-                    <Text style={styles.searchBtnText}>SEARCH</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Results */}
-            <FlatList
-                data={books}
-                keyExtractor={(item) => item.id}
-                renderItem={renderBook}
-                contentContainerStyle={{ paddingBottom: 100 }}
-            />
-        </SafeAreaView>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 }
 
