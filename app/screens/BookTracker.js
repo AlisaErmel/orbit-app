@@ -4,6 +4,8 @@ import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useRef } from "react";
 import Constants from "expo-constants";
+import { db } from '../../firebaseConfig';
+import { ref, push } from 'firebase/database';
 
 export default function BookTracker({ navigation }) {
     //font
@@ -76,13 +78,31 @@ export default function BookTracker({ navigation }) {
         }
     };
 
-    // Save book
+    // Save book to Firebase
     const toggleSaveBook = (book) => {
         const exists = saved.find((b) => b.id === book.id);
+
         if (exists) {
+            // Remove locally saved
             setSaved(saved.filter((b) => b.id !== book.id));
+            // Optionally: remove from Firebase if you track Firebase keys
         } else {
+            // Save locally
             setSaved([...saved, book]);
+
+            // Prepare book data
+            const bookData = {
+                title: book.volumeInfo.title || "Unknown Title",
+                authors: book.volumeInfo.authors || ["Unknown Author"],
+                image: book.volumeInfo.imageLinks?.thumbnail || null,
+                language: book.volumeInfo.language || "N/A",
+                category: book.volumeInfo.categories?.[0] || "N/A",
+            };
+
+            // Push to Firebase
+            push(ref(db, 'booktracker/'), bookData)
+                .then(() => console.log("Book saved to Firebase"))
+                .catch(err => console.error("Error saving book:", err));
         }
     };
 
