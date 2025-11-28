@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: "center",
         marginHorizontal: 20,
-        marginTop: 100,
+        marginTop: 80,
         marginBottom: 20,
     },
     button: {

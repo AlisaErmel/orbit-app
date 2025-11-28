@@ -2,7 +2,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, FlatList, TouchableWithoutFeedback, Keyboard, Animated } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Constants from "expo-constants";
 import { db } from '../../firebaseConfig';
 import { ref, push, onValue, remove } from 'firebase/database';
@@ -118,30 +118,27 @@ export default function BookTracker() {
     };
 
     // Save book to Firebase
-    const toggleSaveBook = (book) => {
+    const toggleSaveBook = useCallback((book) => {
         const exists = saved.find(b =>
             b.title === book.volumeInfo.title &&
             b.authors?.join(",") === book.volumeInfo.authors?.join(",")
         );
 
         if (exists) {
-            // Remove from Firebase
             remove(ref(db, `booktracker/${exists.id}`)).catch(err => console.error(err));
         } else {
-            // Save to Firebase
-            const bookData = {
+            push(ref(db, 'booktracker/'), {
                 title: book.volumeInfo.title || "Unknown Title",
                 authors: book.volumeInfo.authors || ["Unknown Author"],
                 image: book.volumeInfo.imageLinks?.thumbnail || null,
                 language: book.volumeInfo.language || "N/A",
                 category: book.volumeInfo.categories?.[0] || "N/A",
-            };
-            push(ref(db, 'booktracker/'), bookData).catch(err => console.error(err));
+            }).catch(err => console.error(err));
         }
-    };
+    }, [saved]);
 
     // Book card
-    const renderBook = ({ item }) => {
+    const BookCard = React.memo(({ item, onToggleSave }) => {
         const info = item.volumeInfo;
         const image = info.imageLinks?.thumbnail;
 
@@ -151,37 +148,23 @@ export default function BookTracker() {
                     <Image source={{ uri: image }} style={styles.bookImage} />
                 ) : (
                     <View style={[styles.bookImage, styles.noImage]}>
-                        <Text style={{
-                            fontFamily: "Audiowide_400Regular",
-                            color: "#80068eff",
-                            textAlign: "center"
-                        }}>
-                            No Image
-                        </Text>
+                        <Text style={{ fontFamily: "Audiowide_400Regular", color: "#80068eff", textAlign: "center" }}>No Image</Text>
                     </View>
                 )}
 
                 <View style={{ flex: 1, marginLeft: 10 }}>
                     <Text style={[styles.bookTitle, { fontFamily: "Audiowide_400Regular" }]}>{info.title}</Text>
-                    <Text style={[styles.bookAuthor, { fontFamily: "Audiowide_400Regular" }]}>
-                        {info.authors ? info.authors.join(", ") : "Unknown Author"}
-                    </Text>
+                    <Text style={[styles.bookAuthor, { fontFamily: "Audiowide_400Regular" }]}>{info.authors?.join(", ") || "Unknown Author"}</Text>
                     <Text style={[styles.bookLang, { fontFamily: "Audiowide_400Regular" }]}>Language: {info.language}</Text>
-                    <Text style={[styles.bookCat, { fontFamily: "Audiowide_400Regular" }]}>
-                        Category: {info.categories?.[0] || "N/A"}
-                    </Text>
+                    <Text style={[styles.bookCat, { fontFamily: "Audiowide_400Regular" }]}>{info.categories?.[0] || "N/A"}</Text>
                 </View>
 
-                <TouchableOpacity onPress={() => toggleSaveBook(item)}>
-                    <Ionicons
-                        name={item.isSaved ? "heart" : "heart-outline"}
-                        size={28}
-                        color="#3e0445c5"
-                    />
+                <TouchableOpacity onPress={() => onToggleSave(item)}>
+                    <Ionicons name={item.isSaved ? "heart" : "heart-outline"} size={28} color="#3e0445c5" />
                 </TouchableOpacity>
             </View>
         );
-    };
+    });
 
     //Hide and show inputs
     const toggleSearch = () => {
@@ -299,7 +282,7 @@ export default function BookTracker() {
             <FlatList
                 data={books}
                 keyExtractor={(item) => item.id}
-                renderItem={renderBook}
+                renderItem={({ item }) => <BookCard item={item} onToggleSave={toggleSaveBook} />}
                 contentContainerStyle={{
                     paddingBottom: 100,
                     alignItems: "center",
