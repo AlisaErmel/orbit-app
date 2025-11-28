@@ -2,10 +2,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, FlatList, TouchableWithoutFeedback, Keyboard, Animated } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Constants from "expo-constants";
 import { db } from '../../firebaseConfig';
-import { ref, push } from 'firebase/database';
+import { ref, push, onValue, remove } from 'firebase/database';
 
 export default function BookTracker({ navigation }) {
     //font
@@ -25,6 +25,31 @@ export default function BookTracker({ navigation }) {
     const [showSearch, setShowSearch] = useState(true);
     const [searchPerformed, setSearchPerformed] = useState(false); //for no books were found
     const [loading, setLoading] = useState(false);
+
+    // To load saved books
+    useEffect(() => {
+        const savedRef = ref(db, 'booktracker/');
+        const unsubscribe = onValue(savedRef, (snapshot) => {
+            const data = snapshot.val();
+            const savedBooks = data
+                ? Object.keys(data).map(key => ({ id: key, ...data[key] }))
+                : [];
+            setSaved(savedBooks);
+
+            // Update isSaved flag in current books
+            setBooks(prevBooks =>
+                prevBooks.map(book => ({
+                    ...book,
+                    isSaved: savedBooks.some(sb =>
+                        sb.title === book.volumeInfo.title &&
+                        sb.authors?.join(",") === book.volumeInfo.authors?.join(",")
+                    )
+                }))
+            );
+        });
+        return () => unsubscribe();
+    }, []);
+
 
     // Search books
     const searchBooks = async () => {
@@ -73,7 +98,16 @@ export default function BookTracker({ navigation }) {
                 return true;
             });
 
-            setBooks(filtered);
+            // Mark saved books
+            const updatedBooks = filtered.map(book => ({
+                ...book,
+                isSaved: saved.some(s =>
+                    s.title === book.volumeInfo.title &&
+                    s.authors?.join(",") === book.volumeInfo.authors?.join(",")
+                )
+            }));
+
+            setBooks(updatedBooks);
         } catch (error) {
             console.error("Error fetching books:", error);
             setBooks([]);
@@ -84,17 +118,16 @@ export default function BookTracker({ navigation }) {
 
     // Save book to Firebase
     const toggleSaveBook = (book) => {
-        const exists = saved.find((b) => b.id === book.id);
+        const exists = saved.find(b =>
+            b.title === book.volumeInfo.title &&
+            b.authors?.join(",") === book.volumeInfo.authors?.join(",")
+        );
 
         if (exists) {
-            // Remove locally saved
-            setSaved(saved.filter((b) => b.id !== book.id));
-            // Optionally: remove from Firebase if you track Firebase keys
+            // Remove from Firebase
+            remove(ref(db, `booktracker/${exists.id}`)).catch(err => console.error(err));
         } else {
-            // Save locally
-            setSaved([...saved, book]);
-
-            // Prepare book data
+            // Save to Firebase
             const bookData = {
                 title: book.volumeInfo.title || "Unknown Title",
                 authors: book.volumeInfo.authors || ["Unknown Author"],
@@ -102,11 +135,7 @@ export default function BookTracker({ navigation }) {
                 language: book.volumeInfo.language || "N/A",
                 category: book.volumeInfo.categories?.[0] || "N/A",
             };
-
-            // Push to Firebase
-            push(ref(db, 'booktracker/'), bookData)
-                .then(() => console.log("Book saved to Firebase"))
-                .catch(err => console.error("Error saving book:", err));
+            push(ref(db, 'booktracker/'), bookData).catch(err => console.error(err));
         }
     };
 
@@ -114,7 +143,7 @@ export default function BookTracker({ navigation }) {
     const renderBook = ({ item }) => {
         const info = item.volumeInfo;
         const image = info.imageLinks?.thumbnail;
-        const isSaved = saved.some((b) => b.id === item.id);
+        const isSaved = item.isSaved; // use the flag from the book
 
         return (
             <View style={styles.card}>
@@ -145,7 +174,7 @@ export default function BookTracker({ navigation }) {
 
                 <TouchableOpacity onPress={() => toggleSaveBook(item)}>
                     <Ionicons
-                        name={isSaved ? "heart" : "heart-outline"}
+                        name={item.isSaved ? "heart" : "heart-outline"}
                         size={28}
                         color="#3e0445c5"
                     />
