@@ -94,8 +94,9 @@ export default function BookTracker({ navigation }) {
     };
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container}>
+
+            <View style={styles.headContent}>
 
                 {/* Heading + Saved Heart */}
                 <View style={styles.headerRow}>
@@ -103,59 +104,68 @@ export default function BookTracker({ navigation }) {
                         BOOK TRACKER
                     </Text>
 
-                    <TouchableOpacity onPress={() => navigation.navigate("SavedBooks", { saved })}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("SavedBooks", { saved })}
+                        style={styles.topHeart}
+                    >
                         <Ionicons name="heart" size={33} color="#3e0445c5" />
                     </TouchableOpacity>
                 </View>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-                {/* Search inputs */}
-                <View style={styles.searchBlock}>
-                    <TextInput
-                        placeholder="Search by title"
-                        placeholderTextColor="#3e0445c5"
-                        style={styles.input}
-                        value={title}
-                        onChangeText={setTitle}
-                    />
 
-                    <TextInput
-                        placeholder="Search by author"
-                        placeholderTextColor="#3e0445c5"
-                        style={styles.input}
-                        value={author}
-                        onChangeText={setAuthor}
-                    />
+                    {/* Search inputs */}
+                    <View style={styles.searchBlock}>
+                        <TextInput
+                            placeholder="Search by title"
+                            placeholderTextColor="#3e0445c5"
+                            style={styles.input}
+                            value={title}
+                            onChangeText={setTitle}
+                        />
 
-                    <TextInput
-                        placeholder="Search by genre/subject"
-                        placeholderTextColor="#3e0445c5"
-                        style={styles.input}
-                        value={subject}
-                        onChangeText={setSubject}
-                    />
+                        <TextInput
+                            placeholder="Search by author"
+                            placeholderTextColor="#3e0445c5"
+                            style={styles.input}
+                            value={author}
+                            onChangeText={setAuthor}
+                        />
 
-                    <TextInput
-                        placeholder="Language (en, de, ru...)"
-                        placeholderTextColor="#3e0445c5"
-                        style={styles.input}
-                        value={lang}
-                        onChangeText={setLang}
-                    />
+                        <TextInput
+                            placeholder="Search by genre/subject"
+                            placeholderTextColor="#3e0445c5"
+                            style={styles.input}
+                            value={subject}
+                            onChangeText={setSubject}
+                        />
 
-                    <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
-                        <Text style={styles.searchBtnText}>SEARCH</Text>
-                    </TouchableOpacity>
-                </View>
+                        <TextInput
+                            placeholder="Language (en, de, ru...)"
+                            placeholderTextColor="#3e0445c5"
+                            style={styles.input}
+                            value={lang}
+                            onChangeText={setLang}
+                        />
 
-                {/* Results */}
-                <FlatList
-                    data={books}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderBook}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                />
-            </SafeAreaView>
-        </TouchableWithoutFeedback>
+                        <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
+                            <Text style={styles.searchBtnText}>SEARCH</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableWithoutFeedback>
+            </View>
+
+            {/* Results */}
+            <FlatList
+                data={books}
+                keyExtractor={(item) => item.id}
+                renderItem={renderBook}
+                contentContainerStyle={{
+                    paddingBottom: 100,
+                    alignItems: "center", // center cards
+                }}
+            />
+        </SafeAreaView >
     );
 }
 
@@ -163,10 +173,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#e287e771",
-        alignItems: "center",
+    },
+    headContent: {
+        alignItems: "center"
     },
     headerRow: {
-        width: "95%",
+        width: "90%",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
@@ -175,6 +187,14 @@ const styles = StyleSheet.create({
     heading: {
         fontSize: 32,
         color: "#3e0445c5",
+    },
+    topHeart: {
+        borderWidth: 2,    // border thickness
+        borderColor: "#3e0445c5", // border color
+        borderRadius: 25,  // round corners (circle)
+        padding: 5,        // padding around the icon
+        backgroundColor: "#ffffffaa", // semi-transparent background
+        zIndex: 10,        // ensures it's above other elements
     },
     searchBlock: {
         width: "90%",
@@ -194,7 +214,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
         marginTop: 5,
-        marginBottom: 10,
+        marginBottom: 20,
     },
     searchBtnText: {
         color: "#fff",
