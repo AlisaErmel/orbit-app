@@ -1,8 +1,8 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, FlatList, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, FlatList, TouchableWithoutFeedback, Keyboard, Animated } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Constants from "expo-constants";
 
 export default function BookTracker({ navigation }) {
@@ -19,6 +19,8 @@ export default function BookTracker({ navigation }) {
     const [lang, setLang] = useState("");
     const [books, setBooks] = useState([]);
     const [saved, setSaved] = useState([]);
+    const searchHeight = useRef(new Animated.Value(1)).current;//1 means visible
+    const [showSearch, setShowSearch] = useState(true);
 
     // Search books
     const searchBooks = async () => {
@@ -67,17 +69,17 @@ export default function BookTracker({ navigation }) {
                     <Image source={{ uri: image }} style={styles.bookImage} />
                 ) : (
                     <View style={[styles.bookImage, styles.noImage]}>
-                        <Text>No Image</Text>
+                        <Text style={{ fontFamily: "Audiowide_400Regular" }}>No Image</Text>
                     </View>
                 )}
 
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={styles.bookTitle}>{info.title}</Text>
-                    <Text style={styles.bookAuthor}>
+                    <Text style={[styles.bookTitle, { fontFamily: "Audiowide_400Regular" }]}>{info.title}</Text>
+                    <Text style={[styles.bookAuthor, { fontFamily: "Audiowide_400Regular" }]}>
                         {info.authors ? info.authors.join(", ") : "Unknown Author"}
                     </Text>
-                    <Text style={styles.bookLang}>Language: {info.language}</Text>
-                    <Text style={styles.bookCat}>
+                    <Text style={[styles.bookLang, { fontFamily: "Audiowide_400Regular" }]}>Language: {info.language}</Text>
+                    <Text style={[styles.bookCat, { fontFamily: "Audiowide_400Regular" }]}>
                         Category: {info.categories?.[0] || "N/A"}
                     </Text>
                 </View>
@@ -93,8 +95,18 @@ export default function BookTracker({ navigation }) {
         );
     };
 
+    //Hide and show inputs
+    const toggleSearch = () => {
+        Animated.timing(searchHeight, {
+            toValue: showSearch ? 0 : 1, // hide if 1 -> 0
+            duration: 300,
+            useNativeDriver: false,
+        }).start();
+        setShowSearch(!showSearch);
+    };
+
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={[]}>
 
             <View style={styles.headContent}>
 
@@ -111,46 +123,76 @@ export default function BookTracker({ navigation }) {
                         <Ionicons name="heart" size={33} color="#3e0445c5" />
                     </TouchableOpacity>
                 </View>
+
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-
-
-                    {/* Search inputs */}
                     <View style={styles.searchBlock}>
-                        <TextInput
-                            placeholder="Search by title"
-                            placeholderTextColor="#3e0445c5"
-                            style={styles.input}
-                            value={title}
-                            onChangeText={setTitle}
-                        />
 
-                        <TextInput
-                            placeholder="Search by author"
-                            placeholderTextColor="#3e0445c5"
-                            style={styles.input}
-                            value={author}
-                            onChangeText={setAuthor}
-                        />
+                        <Animated.View
+                            style={[
+                                {
+                                    height: searchHeight.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 280],
+                                    }),
+                                    overflow: "hidden",
+                                },
+                            ]}
+                        >
 
-                        <TextInput
-                            placeholder="Search by genre/subject"
-                            placeholderTextColor="#3e0445c5"
-                            style={styles.input}
-                            value={subject}
-                            onChangeText={setSubject}
-                        />
+                            {/* Search inputs */}
+                            <TextInput
+                                placeholder="Search by title"
+                                placeholderTextColor="#3e0445c5"
+                                style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
+                                value={title}
+                                onChangeText={setTitle}
+                            />
 
-                        <TextInput
-                            placeholder="Language (en, de, ru...)"
-                            placeholderTextColor="#3e0445c5"
-                            style={styles.input}
-                            value={lang}
-                            onChangeText={setLang}
-                        />
+                            <TextInput
+                                placeholder="Search by author"
+                                placeholderTextColor="#3e0445c5"
+                                style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
+                                value={author}
+                                onChangeText={setAuthor}
+                            />
 
-                        <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
-                            <Text style={styles.searchBtnText}>SEARCH</Text>
+                            <TextInput
+                                placeholder="Search by genre/subject"
+                                placeholderTextColor="#3e0445c5"
+                                style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
+                                value={subject}
+                                onChangeText={setSubject}
+                            />
+
+                            <TextInput
+                                placeholder="Language (en, de, ru...)"
+                                placeholderTextColor="#3e0445c5"
+                                style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
+                                value={lang}
+                                onChangeText={setLang}
+                            />
+
+                            <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
+                                <Text style={[styles.searchBtnText, { fontFamily: "Audiowide_400Regular" }]}>SEARCH</Text>
+                            </TouchableOpacity>
+
+                        </Animated.View>
+
+                        {/* Arrow to hide/show the search */}
+                        <TouchableOpacity
+                            onPress={toggleSearch}
+                            style={styles.arrow} // align items vertically centered
+                        >
+                            <Ionicons
+                                name={showSearch ? "chevron-up-outline" : "chevron-down-outline"}
+                                size={28}
+                                color="#3e0445c5"
+                            />
+                            <Text style={{ marginLeft: 10, color: "#3e0445c5", fontWeight: "bold", fontFamily: "Audiowide_400Regular" }}>
+                                {showSearch ? "Hide Search" : "Show Search"}
+                            </Text>
                         </TouchableOpacity>
+
                     </View>
                 </TouchableWithoutFeedback>
             </View>
@@ -182,7 +224,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 20,
+        marginTop: 70,
     },
     heading: {
         fontSize: 32,
@@ -214,7 +256,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
         marginTop: 5,
-        marginBottom: 20,
     },
     searchBtnText: {
         color: "#fff",
@@ -243,7 +284,7 @@ const styles = StyleSheet.create({
     bookTitle: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#3e0445c5",
+        color: "#80068eff",
     },
     bookAuthor: {
         fontSize: 14,
@@ -259,5 +300,10 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginTop: 2,
         color: "#3e0445c5",
+    },
+    arrow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 20
     },
 });
