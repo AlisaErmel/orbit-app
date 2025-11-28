@@ -24,11 +24,13 @@ export default function BookTracker({ navigation }) {
     const searchHeight = useRef(new Animated.Value(1)).current;//1 means visible
     const [showSearch, setShowSearch] = useState(true);
     const [searchPerformed, setSearchPerformed] = useState(false); //for no books were found
+    const [loading, setLoading] = useState(false);
 
     // Search books
     const searchBooks = async () => {
         Keyboard.dismiss();
         setSearchPerformed(true); //for no books were found
+        setLoading(true);
 
         let query = [];
 
@@ -75,6 +77,8 @@ export default function BookTracker({ navigation }) {
         } catch (error) {
             console.error("Error fetching books:", error);
             setBooks([]);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -227,9 +231,19 @@ export default function BookTracker({ navigation }) {
                                 onChangeText={setLang}
                             />
 
-                            <TouchableOpacity style={styles.searchBtn} onPress={searchBooks}>
-                                <Text style={[styles.searchBtnText, { fontFamily: "Audiowide_400Regular" }]}>SEARCH</Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.searchBtn,
+                                    loading ? { backgroundColor: "#3f044562" } : {} // change color when loading
+                                ]}
+                                onPress={searchBooks}
+                                disabled={loading} // makes the button unclickable when loading
+                            >
+                                <Text style={[styles.searchBtnText, { fontFamily: "Audiowide_400Regular" }]}>
+                                    {loading ? "SEARCHING..." : "SEARCH"}
+                                </Text>
                             </TouchableOpacity>
+
 
                         </Animated.View>
 
@@ -259,22 +273,18 @@ export default function BookTracker({ navigation }) {
                 renderItem={renderBook}
                 contentContainerStyle={{
                     paddingBottom: 100,
-                    alignItems: "center", // center cards
+                    alignItems: "center",
                 }}
-                ListEmptyComponent={() =>
-                    searchPerformed ? (
-                        <Text style={{
-                            fontFamily: "Audiowide_400Regular",
-                            color: "#3e0445c5",
-                            fontSize: 18,
-                            marginTop: 150,
-                            textAlign: "center",
-                            width: "80%"
-                        }}>
+                ListEmptyComponent={() => {
+                    if (loading) {
+                        return <Text style={{ fontFamily: "Audiowide_400Regular", fontSize: 18, marginTop: 150, color: "#3e0445c5" }}>Loading...</Text>;
+                    } else if (searchPerformed && books.length === 0) {
+                        return <Text style={{ fontFamily: "Audiowide_400Regular", fontSize: 18, marginTop: 150, color: "#3e0445c5", textAlign: "center", width: "80%" }}>
                             No books were found for these search filters.
-                        </Text>
-                    ) : null
-                }
+                        </Text>;
+                    }
+                    return null;
+                }}
             />
 
         </SafeAreaView >
