@@ -6,8 +6,9 @@ import { useState, useRef, useEffect } from "react";
 import Constants from "expo-constants";
 import { db } from '../../firebaseConfig';
 import { ref, push, onValue, remove } from 'firebase/database';
+import { router } from "expo-router";
 
-export default function BookTracker({ navigation }) {
+export default function BookTracker() {
     //font
     const [fontsLoaded] = useFonts({ Audiowide_400Regular });
 
@@ -143,7 +144,6 @@ export default function BookTracker({ navigation }) {
     const renderBook = ({ item }) => {
         const info = item.volumeInfo;
         const image = info.imageLinks?.thumbnail;
-        const isSaved = item.isSaved; // use the flag from the book
 
         return (
             <View style={styles.card}>
@@ -205,7 +205,7 @@ export default function BookTracker({ navigation }) {
                     </Text>
 
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("SavedBooks", { saved })}
+                        onPress={() => router.push("/screens/SavedBooks")}
                         style={styles.topHeart}
                     >
                         <Ionicons name="heart" size={33} color="#3e0445c5" />
