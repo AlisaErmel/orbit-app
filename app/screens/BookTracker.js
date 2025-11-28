@@ -21,30 +21,59 @@ export default function BookTracker({ navigation }) {
     const [saved, setSaved] = useState([]);
     const searchHeight = useRef(new Animated.Value(1)).current;//1 means visible
     const [showSearch, setShowSearch] = useState(true);
+    const [searchPerformed, setSearchPerformed] = useState(false); //for no books were found
 
     // Search books
     const searchBooks = async () => {
         Keyboard.dismiss();
+        setSearchPerformed(true); //for no books were found
 
         let query = [];
 
         if (title) query.push(`intitle:${title}`);
         if (author) query.push(`inauthor:${author}`);
         if (subject) query.push(`subject:${subject}`);
-        if (query.length === 0) return;
 
-        const q = query.join("+");
+        // If nothing entered, use a generic query to fetch books
+        const q = query.length > 0 ? query.join("+") : "book"; // default search
 
-        let url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
-            q
-        )}&maxResults=20&key=${apiKey}`;
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=40&key=${apiKey}${lang ? `&langRestrict=${lang}` : ""}`;
 
-        if (lang) url += `&langRestrict=${lang}`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
 
-        const res = await fetch(url);
-        const data = await res.json();
+            if (!data.items) {
+                setBooks([]);
+                return;
+            }
 
-        setBooks(data.items || []);
+            const filtered = data.items.filter(book => {
+                const info = book.volumeInfo;
+
+                // --- Strict language filter ---
+                if (lang) {
+                    const bookLang = info.language?.toLowerCase();
+                    if (!bookLang || bookLang !== lang.toLowerCase()) return false;
+                }
+
+                // --- Strict subject filter ---
+                if (subject) {
+                    const categories = info.categories || [];
+                    const match = categories.some(cat =>
+                        cat.toLowerCase().includes(subject.toLowerCase())
+                    );
+                    if (!match) return false;
+                }
+
+                return true;
+            });
+
+            setBooks(filtered);
+        } catch (error) {
+            console.error("Error fetching books:", error);
+            setBooks([]);
+        }
     };
 
     // Save book
@@ -69,7 +98,13 @@ export default function BookTracker({ navigation }) {
                     <Image source={{ uri: image }} style={styles.bookImage} />
                 ) : (
                     <View style={[styles.bookImage, styles.noImage]}>
-                        <Text style={{ fontFamily: "Audiowide_400Regular" }}>No Image</Text>
+                        <Text style={{
+                            fontFamily: "Audiowide_400Regular",
+                            color: "#80068eff",
+                            textAlign: "center"
+                        }}>
+                            No Image
+                        </Text>
                     </View>
                 )}
 
@@ -142,7 +177,7 @@ export default function BookTracker({ navigation }) {
                             {/* Search inputs */}
                             <TextInput
                                 placeholder="Search by title"
-                                placeholderTextColor="#3e0445c5"
+                                placeholderTextColor="#3f044585"
                                 style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
                                 value={title}
                                 onChangeText={setTitle}
@@ -150,7 +185,7 @@ export default function BookTracker({ navigation }) {
 
                             <TextInput
                                 placeholder="Search by author"
-                                placeholderTextColor="#3e0445c5"
+                                placeholderTextColor="#3f044585"
                                 style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
                                 value={author}
                                 onChangeText={setAuthor}
@@ -158,7 +193,7 @@ export default function BookTracker({ navigation }) {
 
                             <TextInput
                                 placeholder="Search by genre/subject"
-                                placeholderTextColor="#3e0445c5"
+                                placeholderTextColor="#3f044585"
                                 style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
                                 value={subject}
                                 onChangeText={setSubject}
@@ -166,7 +201,7 @@ export default function BookTracker({ navigation }) {
 
                             <TextInput
                                 placeholder="Language (en, de, ru...)"
-                                placeholderTextColor="#3e0445c5"
+                                placeholderTextColor="#3f044585"
                                 style={[styles.input, { fontFamily: "Audiowide_400Regular" }]}
                                 value={lang}
                                 onChangeText={setLang}
@@ -206,16 +241,33 @@ export default function BookTracker({ navigation }) {
                     paddingBottom: 100,
                     alignItems: "center", // center cards
                 }}
+                ListEmptyComponent={() =>
+                    searchPerformed ? (
+                        <Text style={{
+                            fontFamily: "Audiowide_400Regular",
+                            color: "#3e0445c5",
+                            fontSize: 18,
+                            marginTop: 150,
+                            textAlign: "center",
+                            width: "80%"
+                        }}>
+                            No books were found for these search filters.
+                        </Text>
+                    ) : null
+                }
             />
+
         </SafeAreaView >
     );
 }
 
 const styles = StyleSheet.create({
+    //main
     container: {
         flex: 1,
         backgroundColor: "#e287e771",
     },
+    //heading
     headContent: {
         alignItems: "center"
     },
@@ -238,6 +290,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffffffaa", // semi-transparent background
         zIndex: 10,        // ensures it's above other elements
     },
+    //inputs and search button
     searchBlock: {
         width: "90%",
         marginTop: 20,
@@ -262,6 +315,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
+    //books cards
     card: {
         backgroundColor: "#ffffffaa",
         width: "90%",
@@ -280,6 +334,7 @@ const styles = StyleSheet.create({
     noImage: {
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor: "#e287e771",
     },
     bookTitle: {
         fontSize: 16,
@@ -301,6 +356,7 @@ const styles = StyleSheet.create({
         marginTop: 2,
         color: "#3e0445c5",
     },
+    //arrow to hide/show inputs and search button
     arrow: {
         flexDirection: "row",
         alignItems: "center",
