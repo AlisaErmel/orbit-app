@@ -1,10 +1,14 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, StyleSheet, View, ScrollView } from "react-native";
+import { Text, StyleSheet, View, ScrollView, TouchableOpacity, Linking } from "react-native";
 import { useFonts, Audiowide_400Regular } from "@expo-google-fonts/audiowide";
 
 export default function AboutApp() {
     const [fontsLoaded] = useFonts({ Audiowide_400Regular });
     if (!fontsLoaded) return null;
+
+    const openLink = (url) => {
+        Linking.openURL(url);
+    };
 
     return (
         <SafeAreaView style={styles.container} edges={[]}>
@@ -16,14 +20,23 @@ export default function AboutApp() {
 
                 {/* Google Fonts */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Google Fonts — Audiowide</Text>
+                    <Text style={[styles.cardTitle, { fontFamily: "Audiowide_400Regular" }]}>Google Fonts — Audiowide</Text>
                     <Text style={styles.cardText}>
+                        Designed by Astigmatic
+                        {"\n\n"}
                         Copyright (c) 2012, Brian J. Bonislawsky DBA Astigmatic (AOETI),
                         with Reserved Font Name "Audiowide".
                         {"\n\n"}
                         This font is licensed under the SIL Open Font License 1.1.
-                        Full license: https://openfontlicense.org
                     </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://openfontlicense.org")}>
+                        <Text style={styles.link}>https://openfontlicense.org</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => openLink("https://fonts.google.com/specimen/Audiowide")}>
+                        <Text style={styles.link}>https://fonts.google.com/specimen/Audiowide</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Planets 2D */}
@@ -34,6 +47,10 @@ export default function AboutApp() {
                         {"\n"}
                         Free for personal and commercial use under the Kenney license.
                     </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://kenney.nl/assets/planets")}>
+                        <Text style={styles.link}>https://kenney.nl/assets/planets</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Map Marker */}
@@ -41,26 +58,31 @@ export default function AboutApp() {
                     <Text style={styles.cardTitle}>Map Marker Icon</Text>
                     <Text style={styles.cardText}>
                         Maps and location icons created by Vectorslab — Flaticon.
-                        {"\n"}
-                        https://www.flaticon.com/free-icons/maps-and-location
                     </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://www.flaticon.com/free-icons/maps-and-location")}>
+                        <Text style={styles.link}>https://www.flaticon.com/free-icons/maps-and-location</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Pinterest */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Images from Pinterest</Text>
                     <Text style={styles.cardText}>
-                        Some background and decorative images were sourced from Pinterest
+                        Some images on the FilmTracker_List screen were sourced from Pinterest
                         for non-commercial, educational, and prototype purposes.
                     </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://www.pinterest.com")}>
+                        <Text style={styles.link}>https://www.pinterest.com</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Google Books API */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Google Books API</Text>
                     <Text style={styles.cardText}>
-                        The Google Books API provides access to the Google Books
-                        repository.
+                        The Google Books API provides access to the Google Books repository.
                         {"\n\n"}
                         By using this API, you agree to the Google APIs Terms of Service
                         and the Books API policies.
@@ -71,6 +93,10 @@ export default function AboutApp() {
                         {"\n"}
                         Last update: 7/22/22
                     </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://developers.google.com/books")}>
+                        <Text style={styles.link}>https://developers.google.com/books</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Shuttle Icon */}
@@ -78,10 +104,23 @@ export default function AboutApp() {
                     <Text style={styles.cardTitle}>Start Button Icon</Text>
                     <Text style={styles.cardText}>
                         Shuttle/start button icon created by Freepik — Flaticon.
-                        {"\n"}
-                        https://www.flaticon.com/free-icons/start-button
+                    </Text>
+
+                    <TouchableOpacity onPress={() => openLink("https://www.flaticon.com/free-icons/start-button")}>
+                        <Text style={styles.link}>https://www.flaticon.com/free-icons/start-button</Text>
+                    </TouchableOpacity>
+                </View>
+
+
+                {/* Copyright footer */}
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>
+                        Copyright (c) 2025 Alisa Ermel{"\n"}
+                        All rights reserved.{"\n\n"}
+
                     </Text>
                 </View>
+
 
             </ScrollView>
         </SafeAreaView>
@@ -127,5 +166,24 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: "#333",
         lineHeight: 20,
+    },
+    link: {
+        marginTop: 10,
+        color: "#007AFF",
+        textDecorationLine: "underline",
+        fontSize: 15,
+    },
+    footer: {
+        marginTop: 20,
+        marginBottom: 60,
+        paddingHorizontal: 10,
+        width: "100%",
+        alignItems: "center",
+    },
+    footerText: {
+        fontSize: 13,
+        color: "#333",
+        textAlign: "center",
+        lineHeight: 18,
     },
 });
