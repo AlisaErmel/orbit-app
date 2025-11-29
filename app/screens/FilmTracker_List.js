@@ -96,7 +96,6 @@ const styles = StyleSheet.create({
     heading: {
         fontSize: 30,
         color: "#9a0537b6",
-        fontStyle: "bold",
         marginHorizontal: 10,
     },
     headingImage: {
