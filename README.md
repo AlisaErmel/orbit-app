@@ -271,7 +271,7 @@ GOOGLE_BOOKS_API_KEY=your_api_key_here
 npx expo start #--tunnel
 ```
 
-Open in Expo Go or in an emulator to start using the app.
+Open in **Expo Go** or in an **emulator** to start using the app.
 
 ---
 
