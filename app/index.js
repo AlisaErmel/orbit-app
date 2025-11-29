@@ -156,8 +156,9 @@ const styles = StyleSheet.create({
         margin: 20,
         padding: 15,
         borderRadius: 50,
-        borderWidth: 5,
+        borderWidth: 3,
         borderColor: 'black',
+        borderStyle: "dashed",
     },
     buttonText: {
         color: 'black',

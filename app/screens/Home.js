@@ -33,25 +33,6 @@ export default function Home() {
                     </Text>
                 </Button>
 
-
-                {/* Button Mood Journal */}
-                <Button
-                    onPress={() => router.push("/screens/MoodJournal")}
-                    style={[styles.button, { backgroundColor: "#72cdcd71", borderColor: "#bd36ea71", }]}
-                    mode="outlined"
-                    icon={() => (
-                        <Image
-                            source={require("../../assets/images/mood_journal.png")}
-                            style={styles.buttonIcon}
-                        />
-                    )}
-                >
-                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#bd36ea71" }]}>
-                        -------{">"} ABOUT APP (was a mood journal)
-                    </Text>
-                </Button>
-
-
                 {/* Button Travel Journal */}
                 <Button
                     onPress={() => router.push("/screens/TravelJournal_Main")}
@@ -120,6 +101,24 @@ export default function Home() {
                         -------{">"} Water Tracker
                     </Text>
                 </Button>
+
+                {/* Button About App */}
+                <Button
+                    onPress={() => router.push("/screens/AboutApp")}
+                    style={[styles.button, { backgroundColor: "#72cdcd71", borderColor: "#bd36ea71", }]}
+                    mode="outlined"
+                    icon={() => (
+                        <Image
+                            source={require("../../assets/images/about_app.png")}
+                            style={styles.buttonIcon}
+                        />
+                    )}
+                >
+                    <Text style={[styles.buttonText, { fontFamily: "Audiowide_400Regular", color: "#bd36ea71" }]}>
+                        -------{">"} About App
+                    </Text>
+                </Button>
+
             </View>
 
         </SafeAreaView>

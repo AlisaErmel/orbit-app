@@ -103,7 +103,7 @@ export default function ToDo() {
                 </View>
 
 
-                {/* --- FILTER ROW (All + categories) --- */}
+                {/* --- Filter row (All + categories) --- */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
