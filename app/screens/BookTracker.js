@@ -22,9 +22,9 @@ export default function BookTracker() {
     const [lang, setLang] = useState("");
     const [books, setBooks] = useState([]);
     const [saved, setSaved] = useState([]);
-    const searchHeight = useRef(new Animated.Value(1)).current;//1 means visible
+    const searchHeight = useRef(new Animated.Value(1)).current;// 1 means visible
     const [showSearch, setShowSearch] = useState(true);
-    const [searchPerformed, setSearchPerformed] = useState(false); //for no books were found
+    const [searchPerformed, setSearchPerformed] = useState(false); // for no books were found
     const [loading, setLoading] = useState(false);
 
     // To load saved books

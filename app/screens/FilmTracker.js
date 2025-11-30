@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     },
     //Form header
     formHeaderContainer: {
-        position: "absolute",  // so it overlaps the border
+        position: "absolute",  // it overlaps the border
         top: -18,              // slightly above the form's top border
         backgroundColor: "white", // same as container background
         paddingHorizontal: 10, // some space around the text

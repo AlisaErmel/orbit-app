@@ -11,7 +11,7 @@ export default function FilmTracker_List() {
 
     //Fetch films from Firebase
     useEffect(() => {
-        const filmsRef = ref(db, 'filmtracker/'); // your path in Firebase
+        const filmsRef = ref(db, 'filmtracker/'); // path in Firebase
 
         const unsubscribe = onValue(filmsRef, (snapshot) => {
             const data = snapshot.val();
